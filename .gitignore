@@ -1,0 +1,16 @@
+# Do not version control (upload to github) the following files...
+
+.DS_Store
+*.m~
+# *.mat
+*.aux
+*.log
+*.out
+*.txt
+
+# Ignore these folders completely
+
+testdata
+testdata/*
+archive
+archive/*
