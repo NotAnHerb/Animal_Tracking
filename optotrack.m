@@ -149,6 +149,10 @@ runtrackingh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
     'Position', [0.05 0.40 0.90 0.15], 'FontSize', 11, 'String', 'Perform Tracking',...
     'Callback', @runtracking); 
 
+runcustomh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
+    'Position', [0.05 0.20 0.90 0.15], 'FontSize', 11, 'String', 'Custom Function',...
+    'Callback', @runcustom); 
+
 
 %----------------------------------------------------
 %           MEMO CONSOLE GUI WINDOW
@@ -382,6 +386,26 @@ end
 %        RUN TRACKING FUNCTION IRtrack()
 %----------------------------------------------------
 function runtracking(boxidselecth, eventdata)
+    
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Running IRtrack() function...';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+    
+    IRtrack(VID, mediapath);
+
+end
+
+
+
+
+%----------------------------------------------------
+%        RUN CUSTOM FUNCTION IRtrack()
+%----------------------------------------------------
+function runcustom(boxidselecth, eventdata)
     
     
     % ------  
