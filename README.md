@@ -32,7 +32,7 @@ Tracking_2_0.m is the next version of the tracking software. It tracks the anima
 
 ## Resources
 * [Computational Geometry Algorithm Library](http://www.cgal.org/)
-* [Kinetic Monte Carlo Simulations](http://www.roentzsch.org/SurfDiff/index.html)
+* [Brad's GitHub Demo](http://www.bradleymonk.com/Github)
 * [Unified Form-assembly Code (UFC) User Manual][1]
 
 [1]: http://fenicsproject.org/pub/documents/ufc/ufc-user-manual/ufc-user-manual.pdf
