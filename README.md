@@ -16,10 +16,24 @@ Tracking_2_0.m is the next version of the tracking software. It tracks the anima
   -- Plots major and minor axis of the ellipsis (major would be good to define body elongation -- though it may be skewed by the tail; minor may be good for locating the tail is we are able to draw cross sections orthogonal to the major axis)
   --Working on defining and plotting a vector that would represent both the direction the animal is moving as well as velocity
   
-#Goals
+## Goals
 
 1) Fine tune the tracking process (this is only an initial 'go') and streamline the process to work live at 30 fps -- not everything has to be done online, only the location of the animal's head
 2) Use this information to generate pulses that are exported via the DAQ for optogenetic experiments
 3) Line up fiber photometry data to video and create environment that allows for video annotation (would be nice to see fiber photometry data live -- which shouldn't be too hard as they are only 2 points)
 
+
+
+## Media
+
+<img src="http://camk2.com/pix/alphaShape.png" alt="alphaShape" width="600" border="10" />
+
+
+
+## Resources
+* [Computational Geometry Algorithm Library](http://www.cgal.org/)
+* [Kinetic Monte Carlo Simulations](http://www.roentzsch.org/SurfDiff/index.html)
+* [Unified Form-assembly Code (UFC) User Manual][1]
+
+[1]: http://fenicsproject.org/pub/documents/ufc/ufc-user-manual/ufc-user-manual.pdf
 
