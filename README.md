@@ -26,7 +26,7 @@ Tracking_2_0.m is the next version of the tracking software. It tracks the anima
 
 ## Media
 
-<img src="http://camk2.com/pix/alphaShape.png" alt="alphaShape" width="600" border="10" />
+<img src="http://bradleymonk.com/dropbox/img/thermal.png" alt="ThermalImage" width="600" border="10" />
 
 
 
