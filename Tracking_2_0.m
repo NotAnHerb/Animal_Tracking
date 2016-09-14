@@ -1,4 +1,4 @@
-n_frames = 100%length(Test.xy);
+n_frames = length(Test.xy);
 tic
 
 %image thresholding
@@ -6,7 +6,6 @@ for i = 1:n_frames
     image = Test.image{i};
     image(image<(prctile(reshape(image,[],1),98))) = 0; %thresholds the image (quick process) to only look at top 2% of pixels -- will only work with infrared camera
     image(image>=(prctile(reshape(image,[],1),98))) = 1;
-    
     border {i} = image; %saves thresholded image
 
 end
@@ -28,7 +27,7 @@ end
 %visualization of tracking data
 close all
 figure
-for i = 1:n_frames
+for i = 2:n_frames
     
     %plots original image
     subplot(4,1,1)
