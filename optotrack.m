@@ -292,7 +292,9 @@ end
 
 
 
-
+%----------------------------------------------------
+%        IMPORT VIDEO PATH INFORMATION
+%----------------------------------------------------
 function getvid(boxidselecth, eventdata)
     
     % ------  
@@ -345,6 +347,10 @@ end
 
 
 
+
+%----------------------------------------------------
+%        GET FRAMES OUTPUT STRUCTURE FROM IRframes()
+%----------------------------------------------------
 function getframes(boxidselecth, eventdata)
     
     
@@ -371,6 +377,10 @@ end
 
 
 
+
+%----------------------------------------------------
+%        RUN TRACKING FUNCTION IRtrack()
+%----------------------------------------------------
 function runtracking(boxidselecth, eventdata)
     
     
