@@ -73,7 +73,7 @@ fprintf('\n\n Current working path set to: \n % s \n', thisfilepath)
 
     
 pathdir0 = thisfilepath;
-pathdir1 = [thisfilepath '/neuromorphdata'];
+pathdir1 = [thisfilepath '/media'];
 gpath = [pathdir0 ':' pathdir1];
 addpath(gpath)
 
@@ -84,13 +84,13 @@ fprintf('\n\n Added folders to path: \n % s \n % s \n\n',pathdir0,pathdir1)
 
 %% GET PATHS AND FILES
 
-global datapath datafile mediapath
+global datapath datafile mediapath VID outputstructure
 datapath = '';
 datafile = '';
 mediapath = '';
 
 
-
+ 
 
 %% ESTABLISH GLOBALS AND SET STARTING VALUES
 
@@ -105,13 +105,13 @@ global mainsliderh
 
 
 % mainguih.CurrentCharacter = '+';
-mainguih = figure('Units', 'normalized','Position', [.1 .1 .8 .8], 'BusyAction',...
+mainguih = figure('Units', 'normalized','Position', [.1 .1 .8 .7], 'BusyAction',...
     'cancel', 'Name', 'OptoTrack', 'Tag', 'OptoTrack','Visible', 'Off'); %, ...
     %'KeyPressFcn', {@keypresszoom,1});
 
 haxMAIN = axes('Parent', mainguih, 'NextPlot', 'Add',...
-    'Position', [0.01 0.01 0.60 0.95], 'PlotBoxAspectRatio', [1 1 1], ...
-    'XColor','none','YColor','none'); 
+    'Position', [0.01 0.01 0.60 0.95], ...
+    'XColor','none','YColor','none'); % 'PlotBoxAspectRatio', [1 1 1],
 
 
 
@@ -123,7 +123,7 @@ mainsliderh = uicontrol('Parent', mainguih, 'Units', 'normalized','Style','slide
 
 
 haxMINI = axes('Parent', mainguih, 'NextPlot', 'replacechildren',...
-    'Position', [0.63 0.03 0.3 0.25]); 
+    'Position', [0.63 0.03 0.35 0.25]); 
 
 axes(haxMAIN)
 
@@ -134,83 +134,20 @@ axes(haxMAIN)
 %----------------------------------------------------
 IPpanelH = uipanel('Title','Video Processing','FontSize',10,...
     'BackgroundColor',[.95 .95 .95],...
-    'Position', [0.62 0.60 0.30 0.39]); % 'Visible', 'Off',
+    'Position', [0.62 0.60 0.20 0.39]); % 'Visible', 'Off',
 
 
 getvidh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
-    'Position', [0.05 0.80 0.45 0.15], 'FontSize', 11, 'String', 'Import Video',...
+    'Position', [0.05 0.80 0.90 0.15], 'FontSize', 11, 'String', 'Import Video',...
     'Callback', @getvid); 
 
-uicontrol('Parent', IPpanelH, 'Style', 'Text', 'Units', 'normalized',...
-    'Position', [0.68 0.90 0.25 0.10], 'FontSize', 11,'String', 'ROI ID');
-ROIIDh = uicontrol('Parent', IPpanelH, 'Style', 'Edit', 'Units', 'normalized', ...
-    'Position', [0.68 0.81 0.25 0.10], 'FontSize', 11); 
+getframesh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
+    'Position', [0.05 0.60 0.90 0.15], 'FontSize', 11, 'String', 'Get Frames',...
+    'Callback', @getframes); 
 
-
-
-
-
-% Create three radio buttons in the button group.
-measureButtonsH = uibuttongroup('Parent', IPpanelH, 'Visible','off',...
-                  'Units', 'normalized',...
-                  'Position',[0.05 0.15 0.90 0.60],...
-                  'SelectionChangedFcn',@boxselection);
-
-yp = 1 - ((1/6.2) .* (1:6));              
-bpos1 = [0.05 yp(1) 0.95 0.14];
-bpos2 = [0.05 yp(2) 0.95 0.14];
-bpos3 = [0.05 yp(3) 0.95 0.14];
-bpos4 = [0.05 yp(4) 0.95 0.14];
-bpos5 = [0.05 yp(5) 0.95 0.14];
-bpos6 = [0.05 yp(6) 0.95 0.14];
-
-button_testA = uicontrol(measureButtonsH,'Style','radiobutton',...
-                  'String','Test A',...
-                  'Units', 'normalized',...
-                  'Position',bpos1,...
-                  'HandleVisibility','off');
-              
-button_testB = uicontrol(measureButtonsH,'Style','radiobutton',...
-                  'String','Test B',...
-                  'Units', 'normalized',...
-                  'Position',bpos2,...
-                  'HandleVisibility','off');
-
-button_testC = uicontrol(measureButtonsH,'Style','radiobutton',...
-                  'String','Test C',...
-                  'Units', 'normalized',...
-                  'Position',bpos3,...
-                  'HandleVisibility','off');
-              
-button_testD = uicontrol(measureButtonsH,'Style','radiobutton',...
-                  'String','Test D',...
-                  'Units', 'normalized',...
-                  'Position',bpos4,...
-                  'HandleVisibility','off');              
-
-button_testE = uicontrol(measureButtonsH,'Style','radiobutton',...
-                  'String','Test E',...
-                  'Units', 'normalized',...
-                  'Position',bpos5,...
-                  'HandleVisibility','off');              
-
-button_testF = uicontrol(measureButtonsH,'Style','radiobutton',...
-                  'String','Test F',...
-                  'Units', 'normalized',...
-                  'Position',bpos6,...
-                  'HandleVisibility','off');              
-              
-measureButtonsH.Visible = 'on';
-
-
-savefileh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
-    'Position', [0.05 0.02 0.65 0.10], 'String', 'Save File', 'FontSize', 11,...
-    'Callback', @saveFile);
-
-loadROIh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
-    'Position', [0.70 0.02 0.25 0.10], 'String', 'Load ROIs', 'FontSize', 11,...
-    'Callback', @loadROI);
-
+runtrackingh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
+    'Position', [0.05 0.40 0.90 0.15], 'FontSize', 11, 'String', 'Perform Tracking',...
+    'Callback', @runtracking); 
 
 
 %----------------------------------------------------
@@ -219,7 +156,7 @@ loadROIh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
 
 memopanelH = uipanel('Title','Memo Log ','FontSize',10,...
     'BackgroundColor',[.95 .95 .95],...
-    'Position', [0.62 0.30 0.30 0.29]); % 'Visible', 'Off',
+    'Position', [0.62 0.30 0.35 0.29]); % 'Visible', 'Off',
 
 
 memos = {' Welcome to OptoTrack', ' ',...
@@ -231,7 +168,7 @@ memos = {' Welcome to OptoTrack', ' ',...
 memoboxH = uicontrol('Parent',memopanelH,'Style','listbox','Units','normalized',...
         'Max',10,'Min',0,'Value',[],'FontSize', 13,'FontName', 'FixedWidth',...
         'String',memos,'FontWeight', 'bold',...
-        'Position',[.05 .05 .90 .90]);  
+        'Position',[.02 .02 .96 .96]);  
 
 
 
@@ -267,6 +204,28 @@ function OPTOTRACKgo()
     
     
     set(mainguih, 'Visible', 'On');
+    
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Welcome to OptoTrack';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Optogenetics & Behavior Analysis Toolbox';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Loading GUI interface...';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
 
     
     iminfo = imfinfo('optotracklogo.png');
@@ -315,11 +274,17 @@ function OPTOTRACKgo()
     %----------------------------------------------------
     % set(mainguih, 'Name', datafile);
     set(mainguih, 'Name', 'OptoTrack');
-    set(ROIIDh, 'String', int2str(1));
+    % set(ROIIDh, 'String', int2str(1));
     set(haxMAIN, 'XLim', [1 xdim]);
     set(haxMAIN, 'YLim', [1 ydim]);
     %----------------------------------------------------
-    % axes(haxCCD)
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'OptoTrack is ready!';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
     
     %%
 end
@@ -330,23 +295,93 @@ end
 
 function getvid(boxidselecth, eventdata)
     
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Select video to import';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
     
-if numel(mediapath) < 1
-    [datafile, datapath, ~] = uigetfile({'*.mp4; *.mov'}, 'Select video.');
+    if numel(mediapath) < 1
+        [datafile, datapath, ~] = uigetfile({'*.mp4; *.mov'}, 'Select video.');
+    end
+
+    mediapath = [datapath datafile];    
+
+
+    % READ VIDEO INTO FRAME DATA
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Reading video data...';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+
+    VID = VideoReader(mediapath);				% import vid
+    nf = get(VID, 'NumberOfFrames');			% get total number of vid frames
+
+    v1 = read(VID, 1);
+
+    f1 = mean(v1,3);				% get frame-1 data
+
+    phVID = imagesc(f1 , 'Parent', haxMAIN);
+
+
+    xdim = size(v1,2); 
+    ydim = size(v1,1);
+    set(haxMAIN, 'XLim', [1 xdim]);
+    set(haxMAIN, 'YLim', [1 ydim]);
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Done.';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+
+
 end
 
-mediapath = [datapath datafile];    
 
 
-% READ VIDEO INTO FRAME DATA
+function getframes(boxidselecth, eventdata)
+    
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Running IRframes() function...';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+    
+    [outputstructure] = IRframes(VID, mediapath);
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Retrieved output structure.';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+    
+    disp(outputstructure)
 
-f = VideoReader(mediapath);				% import vid
-nf = get(f, 'NumberOfFrames');			% get total number of vid frames
+end
 
-f1 = mean(read(f, 1),3);				% get frame-1 data
 
-imagesc(f1 , 'Parent', haxMAIN);
 
+
+function runtracking(boxidselecth, eventdata)
+    
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Running IRtrack() function...';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+    
+    IRtrack(VID, mediapath);
 
 end
 
