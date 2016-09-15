@@ -395,7 +395,7 @@ function runtracking(boxidselecth, eventdata)
     pause(.02)
     % ------
     
-    IRtrack(VID, mediapath);
+    IRtrack(outputstructure);
 
 end
 

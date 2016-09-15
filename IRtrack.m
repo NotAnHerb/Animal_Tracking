@@ -1,11 +1,13 @@
-function [] = IRtrack(varargin)
+function [] = IRtrack(outputstructure)
 
-n_frames = length(Test.xy);
+
+
+n_frames = length(outputstructure.xy);
 tic
 
 %image thresholding
 for i = 1:n_frames
-    image = Test.image{i};
+    image = outputstructure.image{i};
     image(image<(prctile(reshape(image,[],1),98))) = 0; %thresholds the image (quick process) to only look at top 2% of pixels -- will only work with infrared camera
     image(image>=(prctile(reshape(image,[],1),98))) = 1;
     border {i} = image; %saves thresholded image
@@ -33,7 +35,7 @@ for i = 2:n_frames
     
     %plots original image
     subplot(4,1,1)
-    imagesc(Test.image{i})
+    imagesc(outputstructure.image{i})
     colormap('gray')
     
     %plots image as it is processed so far
@@ -113,15 +115,15 @@ end
 
 %SMPs -- detection through movement -- may be useful later on for defining
 %'freezing' behavior or characterizing an animal's movements in the FST
-n_frames = length(Test.xy);
+n_frames = length(outputstructure.xy);
 percentile = 98;
 
 for i = 2:n_frames
  
-    image2 = Test.image{i};
+    image2 = outputstructure.image{i};
     image2(image2<(prctile(reshape(image2,[],1),percentile))) = 0;
     
-    image1 = Test.image{i-1};
+    image1 = outputstructure.image{i-1};
     image1(image2<(prctile(reshape(image1,[],1),percentile))) = 0;
      
      image = image2-image1;
@@ -140,7 +142,7 @@ end
 %wrote code to find the border of an image before i realized matlab had an
 %easier code all set up...clunky, but it works
 for k = 1:1
-    image = Test.image{k}; %get image from video
+    image = outputstructure.image{k}; %get image from video
     image(image<(prctile(reshape(image,[],1),98))) = 0; %threshold at 98th percentile
     image(image>=(prctile(reshape(image,[],1),98))) = 100;
     
