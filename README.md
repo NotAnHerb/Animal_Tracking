@@ -3,9 +3,7 @@
 The goal of this project is to write code to track a rodent in real time (30 fps) with a high level of accuracy. Ideally, the code will identify 1) where the animal is 2) in what direction it is facing 3) how fast it is moving 4) SMP values 5) location of head/nose 6) body elongation.
 
 
-IRheattracking_3 is the original program Brad coded a while back catered to the types of data that I have been working with. This rudimentary tracking program finds the nth hottest pixels and takes their centroid as the location of the animal. Despite its simplicity, it works fairly well -- mostly tracking the animal's head due to the heat radiating off the headcap. It outputs tracking data (xy), speed (dL), as well as the first frame of the video (image) to draw ROIs. I have other code for drawing those ROIs and extracting data based on the user-defined ROIs.
-
-Tracking_2_0.m is the next version of the tracking software. It tracks the animal using some of the tools from MATLAB's image analysis toolbox. As of now, it:
+The optotrack program is run from optotrack.m that initializes a GUI interface, and strings together to several video processing functions. First it runs the IRframes() function to perform basic tracking. This involves finding the nth hottest pixels and takes their centroid as the location of the animal. Despite its simplicity, it works fairly well -- mostly tracking the animal's head due to the heat radiating off the headcap. It outputs tracking data (xy), speed (dL), as well as the first frame of the video (image) to draw ROIs. After that, IRtrack() function is called, which tracks the animal using some tools from MATLAB's image analysis toolbox. As of now, it:
 
 1. Thresholds the image to only include the top 2% of pixels
 2. Filling in "holes" in the image, which detects objects
