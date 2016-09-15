@@ -110,7 +110,7 @@ mainguih = figure('Units', 'normalized','Position', [.1 .1 .8 .7], 'BusyAction',
     %'KeyPressFcn', {@keypresszoom,1});
 
 haxMAIN = axes('Parent', mainguih, 'NextPlot', 'Add',...
-    'Position', [0.01 0.01 0.60 0.95], ...
+    'Position', [0.01 0.02 0.60 0.93], 'PlotBoxAspectRatio', [1 1 1],...
     'XColor','none','YColor','none'); % 'PlotBoxAspectRatio', [1 1 1],
 
 
@@ -127,7 +127,7 @@ haxMINI = axes('Parent', mainguih, 'NextPlot', 'replacechildren',...
 
 axes(haxMAIN)
 
-
+set(mainguih, 'Visible', 'Off');
 
 %----------------------------------------------------
 %           IMAGE PROCESSING PANEL
@@ -187,7 +187,8 @@ memoboxH = uicontrol('Parent',memopanelH,'Style','listbox','Units','normalized',
 OPTOTRACKgo()
 
 
-
+pause(.5)
+set(mainguih, 'Visible', 'On');
 
 
 
@@ -203,11 +204,13 @@ OPTOTRACKgo()
 
 
 
-
+%----------------------------------------------------
+%        OPTOTRACK GO!
+%----------------------------------------------------
 function OPTOTRACKgo()
     
     
-    set(mainguih, 'Visible', 'On');
+    % set(mainguih, 'Visible', 'On');
     
     
     % ------  
@@ -263,6 +266,7 @@ function OPTOTRACKgo()
     axes(haxMAIN)
     colormap(haxMAIN,jet); % parula
     phMAIN = imagesc(IMG , 'Parent', haxMAIN);
+    imshow(im , 'Parent', haxMAIN);
               pause(.5)
     
     % imXlim = haxCCD.XLim;
@@ -289,6 +293,8 @@ function OPTOTRACKgo()
     memoboxH.String = memos;
     pause(.02)
     % ------
+    
+    drawnow
     
     %%
 end
