@@ -1,4 +1,8 @@
-# Animal_Tracking
+# Optotrack
+
+<img src="http://bradleymonk.com/dropbox/img/optotracklogo.png" alt="Optotrack Software" width="500" border="10" />
+
+## About
 
 The goal of this project is to write code to track a rodent in real time (30 fps) with a high level of accuracy. Ideally, the code will identify 1) where the animal is 2) in what direction it is facing 3) how fast it is moving 4) SMP values 5) location of head/nose 6) body elongation.
 
@@ -22,13 +26,6 @@ The project goals can be defined as follows:
 1. Fine tune the tracking process (this is only an initial 'go') and streamline the process to work live at 30 fps -- not everything has to be done online, only the location of the animal's head
 2. Use this information to generate pulses that are exported via the DAQ for optogenetic experiments
 3. Line up fiber photometry data to video and create environment that allows for video annotation (would be nice to see fiber photometry data live -- which shouldn't be too hard as they are only 2 points)
-
-
-
-## Media
-
-<img src="http://bradleymonk.com/dropbox/img/thermal.png" alt="ThermalImage" width="600" border="10" />
-
 
 
 ## Resources
