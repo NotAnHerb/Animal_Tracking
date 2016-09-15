@@ -280,7 +280,7 @@ close(fh1)
 
 outputstructure.dL = dL;
 outputstructure.xy = xy;
-outputstructure.image = framedat{1};
+outputstructure.image = framedat;
 
 %
 % figure
