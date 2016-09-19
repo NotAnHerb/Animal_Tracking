@@ -1,31 +1,30 @@
-% function [] = camsetup(varargin)
+function [] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np)
 
-clc; close all; clear;
-
-% thisfile = 'camsetup2.m';
-% thisfilepath = fileparts(which(thisfile));
-% cd(thisfilepath);
-% 
-% fprintf('\n\n Current working path set to: \n % s \n', thisfilepath)
-%     
-% pathdir0 = thisfilepath;
-% pathdir1 = [thisfilepath '../'];
-% pathdir2 = [thisfilepath '../optotrackmedia'];
-% gpath = [pathdir0 ':' pathdir1 ':' pathdir2];
-% addpath(gpath)
-
+% clc; close all; clear;
 
 %% USER-ENTERED PARAMETERS
 
-total_trials = 10;
+% total_trials = 10;
+% 
+% framesPerTrial = 3;
+% 
+% threshmask = .50;
+% 
+% npixels = 100;  % Number of 'hot' pixels to average to find center
 
-framesPerTrial = 3;
+
+
+
+total_trials = tri;
+
+framesPerTrial = fpt;
+
+threshmask = pxt;
+
+npixels = np;  % Number of 'hot' pixels to average to find center
+
 
 imageType = 'rgb';      % 'rgb' or 'grayscale'
-
-threshmask = .50;
-
-npixels = 100;  % Number of 'hot' pixels to average to find center
 
 
 %% PREALLOCATE DATA COLLECTORS
@@ -141,31 +140,30 @@ end
 
 
 %% OPTIONAL: Play VIDEO overlaying tracking position over rat to check accuracy
-close all
 
-fh1=figure('Units','normalized','OuterPosition',[.1 .1 .6 .7],'Color','w','MenuBar','none');
+figure(mainguih);
 
-hax1 = axes('Position',[.05 .05 .9 .9],'Color','none','NextPlot','replacechildren');
-hax2 = axes('Position',[.05 .05 .9 .9],'Color','none','XTick',[],'YTick',[],'NextPlot','replacechildren');
-hax3 = axes('Position',[.05 .05 .9 .9],'Color','none','XTick',[],'YTick',[],'NextPlot','replacechildren');
-axis off; hold on;
+% hax1 = axes('Position',[.05 .05 .9 .9],'Color','none','NextPlot','replacechildren');
+% hax2 = axes('Position',[.05 .05 .9 .9],'Color','none','XTick',[],'YTick',[],'NextPlot','replacechildren');
+% hax3 = axes('Position',[.05 .05 .9 .9],'Color','none','XTick',[],'YTick',[],'NextPlot','replacechildren');
+% axis off; hold on;
 
-axes(hax1)
+axes(haxMAIN)
 ph1 = imagesc(Frames(:,:,1));
 set(gca,'YDir','reverse')
-hax1.XLim = [1 size(IMG,2)];
-hax1.YLim = [1 size(IMG,1)];
+haxMAIN.XLim = [1 size(IMG,2)];
+haxMAIN.YLim = [1 size(IMG,1)];
 hold on
 
 axLims = axis;
 
-axes(hax2)
+% axes(hax2)
 ph2 = scatter(xy(1,1),xy(1,2),100,'filled','MarkerFaceColor',[.9 .1 .1]);
 axis(axLims)
 hold on
 
 
-axes(hax3)
+% axes(hax3)
 ph3 = plot(xy(1,1),xy(1,2),'r');
 axis(axLims)
 hold on
@@ -191,14 +189,71 @@ for nn=1:size(Frames,3)
     mm = nn*100-1;
 end
 
-axes(hax3)
+% axes(hax3)
 ph3 = plot(xys(:,1)+2,xys(:,2)+.5,'Color',[.99 .6 .90],'LineWidth',5);
 ph3 = plot(xys(:,1),xys(:,2),'Color',[.99 .1 .75],'LineWidth',2);
 
 axis(axLims)
 
-%%
+% fh1=figure('Units','normalized','OuterPosition',[.1 .1 .6 .7],'Color','w','MenuBar','none');
+% 
+% hax1 = axes('Position',[.05 .05 .9 .9],'Color','none','NextPlot','replacechildren');
+% hax2 = axes('Position',[.05 .05 .9 .9],'Color','none','XTick',[],'YTick',[],'NextPlot','replacechildren');
+% hax3 = axes('Position',[.05 .05 .9 .9],'Color','none','XTick',[],'YTick',[],'NextPlot','replacechildren');
+% axis off; hold on;
+% 
+% axes(hax1)
+% ph1 = imagesc(Frames(:,:,1));
+% set(gca,'YDir','reverse')
+% hax1.XLim = [1 size(IMG,2)];
+% hax1.YLim = [1 size(IMG,1)];
+% hold on
+% 
+% axLims = axis;
+% 
+% axes(hax2)
+% ph2 = scatter(xy(1,1),xy(1,2),100,'filled','MarkerFaceColor',[.9 .1 .1]);
+% axis(axLims)
+% hold on
+% 
+% 
+% axes(hax3)
+% ph3 = plot(xy(1,1),xy(1,2),'r');
+% axis(axLims)
+% hold on
+%     
+% 
+% t = (1:size(xy,1));
+% ts = linspace(1, size(xy,1), size(xy,1)*100 );
+% xys = spline(t,xy',ts)';
+% 
+% mm=1;
+% for nn=1:size(Frames,3)
+% 
+%     ph1.CData = Frames(:,:,nn);
+%     ph2.XData = xy(nn,1);
+%     ph2.YData = xy(nn,2);
+%     % ph3.XData = xy(1:nn,1);
+%     % ph3.YData = xy(1:nn,2);
+%     ph3.XData = xys(1:mm,1);
+%     ph3.YData = xys(1:mm,2);
+%     
+%     pause(.2)
+% 
+%     mm = nn*100-1;
 % end
+% 
+% axes(hax3)
+% ph3 = plot(xys(:,1)+2,xys(:,2)+.5,'Color',[.99 .6 .90],'LineWidth',5);
+% ph3 = plot(xys(:,1),xys(:,2),'Color',[.99 .1 .75],'LineWidth',2);
+% 
+% axis(axLims)
+
+
+end
+%% EOF
+
+
 % SAVE IMAGE ACQUISITION NOTES
 %{
 
@@ -303,26 +358,4 @@ startTime = GetSecs;
 ff=1;
 
 %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

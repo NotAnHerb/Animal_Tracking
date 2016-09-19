@@ -73,13 +73,12 @@ fprintf('\n\n Current working path set to: \n % s \n', thisfilepath)
 
     
 pathdir0 = thisfilepath;
-pathdir1 = [thisfilepath '/media'];
-gpath = [pathdir0 ':' pathdir1];
+pathdir1 = [thisfilepath '/optotrackmedia'];
+pathdir2 = [thisfilepath '/optotracksubfunctions'];
+gpath = [pathdir0 ':' pathdir1 ':' pathdir2];
 addpath(gpath)
 
 fprintf('\n\n Added folders to path: \n % s \n % s \n\n',pathdir0,pathdir1)
-
-
 
 
 %% GET PATHS AND FILES
@@ -96,7 +95,7 @@ mediapath = '';
 
 global haxMAIN haxMINI memos memoboxH
 
-global mainsliderh
+global mainsliderh LTtrials LTframespertrial LTpixelthresh LTnpixels
 
 
 %########################################################################
@@ -130,11 +129,11 @@ axes(haxMAIN)
 set(mainguih, 'Visible', 'Off');
 
 %----------------------------------------------------
-%           IMAGE PROCESSING PANEL
+%           IMPORTED VIDEO PROCESSING PANEL
 %----------------------------------------------------
 IPpanelH = uipanel('Title','Video Processing','FontSize',10,...
     'BackgroundColor',[.95 .95 .95],...
-    'Position', [0.62 0.60 0.20 0.39]); % 'Visible', 'Off',
+    'Position', [0.62 0.60 0.17 0.39]); % 'Visible', 'Off',
 
 
 getvidh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
@@ -152,6 +151,48 @@ runtrackingh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
 runcustomh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
     'Position', [0.05 0.20 0.90 0.15], 'FontSize', 11, 'String', 'Custom Function',...
     'Callback', @runcustom); 
+
+
+
+
+%----------------------------------------------------
+%           LIVE VIDEO TRACKING PANEL
+%----------------------------------------------------
+LivePanelH = uipanel('Title','Live Tracking','FontSize',10,...
+    'BackgroundColor',[.95 .95 .95],...
+    'Position', [0.81 0.60 0.17 0.39]); % 'Visible', 'Off',
+
+
+livetrackh = uicontrol('Parent', LivePanelH, 'Units', 'normalized', ...
+    'Position', [0.05 0.80 0.90 0.15], 'FontSize', 11, 'String', 'Live Tracking Test',...
+    'Callback', @livetracktest); 
+
+
+uicontrol('Parent', LivePanelH, 'Style', 'Text', 'Units', 'normalized', 'HorizontalAlignment','right',...
+    'Position', [0.01 0.69 0.48 0.09], 'FontSize', 11,'String', 'Total Trials:');
+LTtrials = uicontrol('Parent', LivePanelH, 'Style', 'Edit', 'Units', 'normalized', ...
+    'Position', [0.55 0.70 0.35 0.09], 'FontSize', 11); 
+
+uicontrol('Parent', LivePanelH, 'Style', 'Text', 'Units', 'normalized','HorizontalAlignment','right',...
+    'Position', [0.01 0.59 0.48 0.09], 'FontSize', 11,'String', 'Frames per Trial:');
+LTframespertrial = uicontrol('Parent', LivePanelH, 'Style', 'Edit', 'Units', 'normalized', ...
+    'Position', [0.55 0.60 0.35 0.09], 'FontSize', 11); 
+
+uicontrol('Parent', LivePanelH, 'Style', 'Text', 'Units', 'normalized', 'HorizontalAlignment','right',...
+    'Position', [0.01 0.49 0.48 0.09], 'FontSize', 11,'String', 'Pixel Threshold:');
+LTpixelthresh = uicontrol('Parent', LivePanelH, 'Style', 'Edit', 'Units', 'normalized', ...
+    'Position', [0.55 0.50 0.35 0.09], 'FontSize', 11);
+
+uicontrol('Parent', LivePanelH, 'Style', 'Text', 'Units', 'normalized', 'HorizontalAlignment','right',...
+    'Position', [0.01 0.39 0.48 0.09], 'FontSize', 11,'String', 'Pixels to Average:');
+LTnpixels = uicontrol('Parent', LivePanelH, 'Style', 'Edit', 'Units', 'normalized', ...
+    'Position', [0.55 0.40 0.35 0.09], 'FontSize', 11);
+
+
+set(LTtrials, 'String', int2str(5));
+set(LTframespertrial, 'String', int2str(3));
+set(LTpixelthresh, 'String', int2str(0.05));
+set(LTnpixels, 'String', int2str(100));
 
 
 %----------------------------------------------------
@@ -450,6 +491,40 @@ function mainslider(hObject, eventdata)
     drawnow
 end
 
+
+
+
+
+%----------------------------------------------------
+%        GET FRAMES OUTPUT STRUCTURE FROM IRframes()
+%----------------------------------------------------
+function livetracktest(boxidselecth, eventdata)
+    
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Running livetracking() function test...';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+    
+    
+    trials = str2num(LTtrials.String);
+    framespertrial = str2num(LTframespertrial.String);
+    pixelthresh = str2num(LTpixelthresh.String);
+    npixels = str2num(LTnpixels.String);
+     
+
+    livetracking(mainguih, haxMAIN, trials, framespertrial, pixelthresh, npixels);
+    
+    % ------  
+    memos(1:end-1) = memos(2:end);
+    memos{end} = 'Finished running livetracking test.';
+    memoboxH.String = memos;
+    pause(.02)
+    % ------
+
+end
 
 
 
