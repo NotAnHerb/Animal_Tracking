@@ -1,70 +1,120 @@
 function [] = IRtrack(outputstructure)
 
+% this code is the 'meat' of the tracking software. 
+% 
+% it works by first
+% thresholding the image to only look at the top 2% of pixels (more specific
+% to IR imaging -- but could probably work with a white rat on a black
+% background). 
+% 
+% after thresholding, it defines "objects" as contiguous pixels
+% and only looks at the largest "object." 
+% 
+% it finds a point at the front and
+% back of the animal using regionprops. 
+% 
+% only having these points is
+% insufficient to track the animal as 1) we don't know which is the front or
+% rear and 2) when the animal is curled, these points do not lie on the
+% animal. 
+% 
+% to circumvent these issues, the program draws a circular mask with
+% a defined radius at each point. the mean pixel value within each mask is
+% calculated and the larger of the two is the head. (if this is not accurate
+% enough, a weight can be assigned to the position previous defined as the
+% head to minimize errors). 
+% 
+% it then uses this head_mask to define the
+% animal's location and can trigger a function/event when the animal is
+% within the user_defined ROI.
+
+%the end result is a fast program that accurately tracks the head of an
+%animal in real-time.
+
+%%
+%makes figure of image and allows user to draw an ROI over that image
+
+%inputs into GUI -- ROI number, rule (fx) associated with each ROI -- it
+%would also be nice if the program didn't crash if you had to redraw the
+%roi -- ie you could redo this function for each ROI if necessary (this
+%will be useful moving between animals where the testing arena might move
+%ever so slightly) -- in this case, you could plot previous ROIs and move
+%them a little bit
+
+imagesc(outputstructure.image{1}) %plots first image from a recorded file
+
+[STIM_region, STIM_region_x, STIM_region_y] = roipoly; %allows user to plot polygonal ROI
+hold on
+plot(STIM_region_x, STIM_region_y,'linewidth',10) %show ROI on plot
+
+%%
 
 
-n_frames = length(outputstructure.xy);
-tic
 
-%image thresholding
-for i = 1:n_frames
+%this won't be necessary with live video
+n_frames = length(outputstructure.xy); 
+
+%radius of circle program draws -- this could be inputed in the gui
+%or it can be calculated once -- when we draw ROI
+r = 60; 
+
+%size of image -- this could be inputed in the gui
+[iy, ix] = size(outputstructure.image{1}); 
+
+%this can be a value that we can set before the livetrack begins -- 
+%will be different for different cameras / setups -- should be inputed into GUI
+threshold = 98; 
+
+%other inputs into GUI -- how to track the animal (ie head, centerpoint,
+%and point of the animal, etcetera -- we can have different functions for
+%all of these)
+
+
+
+for i = 1:2:n_frames
+
+    %thresholds image
     image = outputstructure.image{i};
-    image(image<(prctile(reshape(image,[],1),98))) = 0; %thresholds the image (quick process) to only look at top 2% of pixels -- will only work with infrared camera
-    image(image>=(prctile(reshape(image,[],1),98))) = 1;
-    border {i} = image; %saves thresholded image
+    image(image<(prctile(reshape(image,[],1),threshold))) = 0; 
+    image(image>=(prctile(reshape(image,[],1),threshold))) = 1;
+   
+    %find regions with contiguous pixels and makes 'objects'
+    CC = bwconncomp(image);
+    temp = regionprops(CC, 'Area','centroid',...
+        'majoraxislength','minoraxislength',...
+        'Orientation');
+    %and picks only the largest one
+    L = labelmatrix(CC);
+    [M I] = max([temp.Area]);
+    BW2 = ismember(L,I);
+    
 
-end
-toc
+    BW{i} = BW2; %saves thresholded image
+    BW_region(i) = temp(I); %saves regionprops for large object in image
 
-%%
-close all
-%image processing
-for i = 1:n_frames
-    
-    BWdfill = imfill(border{i}, 'holes'); %fills in thresholded images
-    BWdfill = bwareaopen(BWdfill,600,8); %excludes any region less than 600 pixels
-    border2{i} = BWdfill; %saves as border2
- 
-end
+  
+%uses regionprops to plot majoraxis, at the centroid, at the set
+%orientation -- note this can also draw an oval around the animal -- the
+%main output is x(1) y(1) and x(2) y(2) which are the points at either end
+%of the animal (roughly)
 
-%%
 
-%visualization of tracking data
-close all
-figure
-for i = 2:n_frames
-    
-    %plots original image
-    subplot(4,1,1)
-    imagesc(outputstructure.image{i})
-    colormap('gray')
-    
-    %plots image as it is processed so far
-    subplot(4,1,2)
-    imagesc(border2{i});
-    hold on
-    
-    s = regionprops(border2{i},'centroid','majoraxislength','minoraxislength',...
-        'boundingbox','Orientation',...
-        'Perimeter','FilledArea'); %saves a bunch of parameters in structure s
-    
-    %plots centroid on animal
-    scatter(s(1).Centroid(1),s(1).Centroid(2),'k');
-    
-    %plots ellipsis around animal (code based on Steve Eddin's code:
-    %http://blogs.mathworks.com/steve/2010/07/30/visualizing-regionprops-ellipse-measurements/)
-    
-    phi = linspace(0,2*pi,50);
+%note it would be very easy to track the animal based on its centerpoint
+%instead of its head -- this function could be helpful for certain
+%experiments
+
+    phi = linspace(0,2*pi,3);
     cosphi = cos(phi);
     sinphi = sin(phi);
 
     
-    xbar = s(1).Centroid(1);
-    ybar = s(1).Centroid(2);
+    xbar = BW_region(i).Centroid(1);
+    ybar = BW_region(i).Centroid(2);
 
-    a = s(1).MajorAxisLength/2;
-    b = s(1).MinorAxisLength/2;
+    a = BW_region(i).MajorAxisLength/2;
+    b = BW_region(i).MinorAxisLength/2;
 
-    theta = pi*s(1).Orientation/180;
+    theta = pi*BW_region(i).Orientation/180;
     R = [ cos(theta)   sin(theta)
          -sin(theta)   cos(theta)];
 
@@ -73,94 +123,79 @@ for i = 2:n_frames
 
     x = xy(1,:) + xbar;
     y = xy(2,:) + ybar;
-
-    plot(x,y,'r','LineWidth',2);
     
- % plots rectange around animal
+    x = x(1:2);
+    y = y(1:2);
     
-    rectangle('position',s(1).BoundingBox)
-    
-   
-    
- %plots major and minor axis -- major axis may help define "body
- %elongation" while minor axis may help us identify the tail of the animal
- %-- especially if we can take cross sections through the ellipsis
-    
-    subplot(4,1,3)
-    scatter(i,s(1).MajorAxisLength,'b')
-    scatter(i,s(1).MinorAxisLength,'m')
-    hold on
-    
-    
-    
-    %plots perimeter
-    subplot(4,1,4)
-    scatter(i,s(1).Perimeter)
-    hold on
-    
-    %in progress -plotting orientation of animal
-    
-%     subplot(4,1,4)
-%     theta = s(1).Orientation;
-%     rho = s(1).MajorAxisLength;
-%     scatter(i,theta)
-%     hold on
-    
-    pause(.01)
-   
-end
-
-
-%%
-
-%SMPs -- detection through movement -- may be useful later on for defining
-%'freezing' behavior or characterizing an animal's movements in the FST
-n_frames = length(outputstructure.xy);
-percentile = 98;
-
-for i = 2:n_frames
  
-    image2 = outputstructure.image{i};
-    image2(image2<(prctile(reshape(image2,[],1),percentile))) = 0;
+%makes circular mask with radius r around x(1) y(1) -- outputs values
+%'testing' which is the mean pixel value in that region
+
+    cx=x(1);cy=y(1);
+    [x_3,y_3]=meshgrid(-(cx-1):(ix-cx),-(cy-1):(iy-cy));
+    c_mask_1=((x_3.^2+y_3.^2)<=r^2);
     
-    image1 = outputstructure.image{i-1};
-    image1(image2<(prctile(reshape(image1,[],1),percentile))) = 0;
+
+    testing = mean(mean(c_mask_1 .* BW{i}));
+  
+    
+%makes circular mask with radius r around x(2) y(2) -- outputs values
+%'testing2' which is the mean pixel value in that region
+
+    
+    cx=x(2);cy=y(2);
+    [x_3,y_3]=meshgrid(-(cx-1):(ix-cx),-(cy-1):(iy-cy));
+    c_mask_2=((x_3.^2+y_3.^2)<=r^2);
+    
+ 
+    testing2 = mean(mean(c_mask_2 .* BW{i}));
+    
+
+%whichever mask has a larger mean value is the head -- so make that value
+%'head_mask'
+
+    if testing > testing2
+        head_mask{i} = (c_mask_1.* BW{i});
+    else
      
-     image = image2-image1;
-     image(image > 1) = 100;
-    
-    image = flipdim(image,1);
-   
-    imagesc(image)
-    set(gca,'YDir','normal') %should probably do this with all images as MATLAB inexplicably flips everything around
-    pause(.01)
-end
-
-
-
-%%
-%wrote code to find the border of an image before i realized matlab had an
-%easier code all set up...clunky, but it works
-for k = 1:1
-    image = outputstructure.image{k}; %get image from video
-    image(image<(prctile(reshape(image,[],1),98))) = 0; %threshold at 98th percentile
-    image(image>=(prctile(reshape(image,[],1),98))) = 100;
-    
-    [x y] = size(image);
-    image3 = image;
-    
-    for i = 2:x-1
-        for j = 2:y-1
-            center_pt = image(i,j);
-            surround_pts = mean(image(i-1:i+1,j-1:j+1));
-            if center_pt == surround_pts;
-                image3(i,j) = 0;
-            else image3(i,j) = 100;
-            end
-        end
+        head_mask{i} = (c_mask_2.* BW{i});
     end
-    border{k} = image3;
+    
+       head_center{i} = regionprops(head_mask{i},'centroid');
+   
+   
+     if mean(mean(STIM_region.*head_mask{i})) > 0 
+       %some rule -- ie -- a pulse that goes through the DAC
+   else
+   end
+    
+
+    
+ 
+   
+   %plots a video of the thresholded image, the user_defined ROI, the
+   %centroid of the head_mask, and changes the color of the ROI is the
+   %animal is detected inside it
+   
+   %would be cool if in the live-tracking mode -- if we could visualize the
+   %ROIs overlaid on the live video as well as whether the animal is being
+   %detected in a given ROI ... sort of like these videos
+   
+   %plot video and tracking
+% %    imagesc(BW{i})
+% %    hold on
+% %    plot(STIM_region_x, STIM_region_y,'k')
+% %    scatter(head_center{i}.Centroid(1),head_center{i}.Centroid(2),'k')
+% %    
+% %    if mean(mean(STIM_region.*head_mask{i})) > 0
+% %        plot(STIM_region_x, STIM_region_y,'y')
+% %    else
+% %    end
+% %    
+% %    pause(.05)
+    
 end
 
 
-end
+%won't be necessary in function
+%clearvars -except BW Test head_center head_mask STIM_region STIM_region_x STIM_region_y

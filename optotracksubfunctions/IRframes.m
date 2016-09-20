@@ -22,7 +22,7 @@ function [outputstructure] = IRframes(varargin)
         
         f = VideoReader(mediapath);				% import vid
         
-        SkpFrm = 30; %reads every 30 frames
+        SkpFrm = 1; %reads every 30 frames
 
     elseif nargin == 1
         
@@ -31,13 +31,13 @@ function [outputstructure] = IRframes(varargin)
         [datafile, datapath, ~] = uigetfile({'*.mp4; *.mov'}, 'Select video.');
         mediapath = [datapath datafile];
 
-        SkpFrm = 30; %reads every 30 frames
+        SkpFrm = 1; %reads every 30 frames
         
     elseif nargin == 2
         
         [f, mediapath] = deal(varargin{:});
         
-        SkpFrm = 30; %reads every 30 frames
+        SkpFrm = 1; %reads every 30 frames
         
     elseif nargin == 3
         
@@ -68,7 +68,7 @@ fh1=figure('Units','normalized','OuterPosition',[.1 .1 .8 .8],'Color','w','MenuB
 hax1 = axes('Position',[.02 .02 .95 .95],'Color','none','XTick',[],'YTick',[],...
     'NextPlot','replacechildren', 'XColor','none','YColor','none', 'PlotBoxAspectRatio', [1 1 1]);
 
-imagesc(f1); % plot frame-1 data
+% imagesc(f1); % plot frame-1 data
 
 
 % GET FRAME DATA
