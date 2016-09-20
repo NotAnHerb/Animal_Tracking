@@ -1,4 +1,6 @@
 function [] = IRtrack(outputstructure)
+%TRACK'S ANIMAL'S HEAD
+
 
 % this code is the 'meat' of the tracking software. 
 % 
