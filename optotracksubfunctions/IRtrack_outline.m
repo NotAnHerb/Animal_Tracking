@@ -1,6 +1,7 @@
 function [] = IRtrack_outline(outputstructure)
 %TRACK'S OUTLINE of ANIMAL
 
+%if any of the animal is within an ROI do X function
 
 %%
 %makes figure of image and allows user to draw an ROI over that image
@@ -28,24 +29,12 @@ close all
 n_frames = length(outputstructure.xy); 
 
 
-
-%size of image -- this could be inputed in the gui
-[iy, ix] = size(outputstructure.image{1}); 
-
-%radius to consider around centerpoint
-r = 10;
-
 %this can be a value that we can set before the livetrack begins -- 
 %will be different for different cameras / setups -- should be inputed into GUI
 threshold = 98; 
 
-%other inputs into GUI -- how to track the animal (ie head, centerpoint,
-%and point of the animal, etcetera -- we can have different functions for
-%all of these)
 
-
-
-for i = 1:2:n_frames
+for i = 1:n_frames
 
     %thresholds image
     image = outputstructure.image{i};
@@ -54,9 +43,9 @@ for i = 1:2:n_frames
    
     %find regions with contiguous pixels and makes 'objects'
     CC = bwconncomp(image);
-    temp = regionprops(CC, 'Area','centroid',...
-        'majoraxislength','minoraxislength',...
-        'Orientation');
+    
+    temp = regionprops(CC,'Area');
+
     %and picks only the largest one
     L = labelmatrix(CC);
     [M I] = max([temp.Area]);
@@ -64,23 +53,16 @@ for i = 1:2:n_frames
     
 
     BW{i} = BW2; %saves thresholded image
-    BW_region(i) = temp(I); %saves regionprops for large object in image
-
 
     
-    cx=BW_region(i).Centroid(1);cy=BW_region(i).Centroid(2);
-    
-    [x_3,y_3]=meshgrid(-(cx-1):(ix-cx),-(cy-1):(iy-cy));
-    c_mask_2=((x_3.^2+y_3.^2)<=r^2);
-    
-    center_mask{i} = c_mask_2;
 
 
 
  imagesc(BW{i})
+ 
    hold on
 
-    if mean(mean(center_mask{i}.*STIM_region)) > 0
+    if mean(mean(BW{i}.*STIM_region)) > 0
         plot(STIM_region_x, STIM_region_y,'y')
         %insert in_ROI function here
     else
@@ -104,10 +86,7 @@ for i = 1:2:n_frames
    %plot video and tracking
   
    
-   scatter(BW_region(i).Centroid(1),BW_region(i).Centroid(2),'k')
-   
-
-   pause(.05)
+pause(.05)
     
 end
 
