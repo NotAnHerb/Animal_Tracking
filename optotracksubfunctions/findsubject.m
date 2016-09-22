@@ -1,12 +1,12 @@
-function [xy] = findsubject(image)
+function [head_mask] = findsubject(image, threshmask, headrad, imsz)
 
 
 
 
 
     %thresholds image
-    image(image<(prctile(reshape(image,[],1),threshold))) = 0; 
-    image(image>=(prctile(reshape(image,[],1),threshold))) = 1;
+    image(image<(prctile(reshape(image,[],1),threshmask))) = 0; 
+    image(image>=(prctile(reshape(image,[],1),threshmask))) = 1;
 
     
     
@@ -43,15 +43,17 @@ function [xy] = findsubject(image)
     xbar = BW_region.Centroid(1);
     ybar = BW_region.Centroid(2);
 
-    a = BW_region.MajorAxisLength/2;
-    b = BW_region.MinorAxisLength/2;
+    a = BW_region.MajorAxisLength / 2;
+    b = BW_region.MinorAxisLength / 2;
 
     theta = pi*BW_region.Orientation/180;
     
-    R = [ cos(theta)   sin(theta)  -sin(theta)   cos(theta)];
+    R = [ cos(theta)   sin(theta);  -sin(theta)   cos(theta) ];
 
     xy = [a*cosphi; b*sinphi];
-    xy = R*xy;
+
+    
+    xy = R * xy;
 
     x = xy(1,:) + xbar;
     y = xy(2,:) + ybar;
@@ -63,9 +65,12 @@ function [xy] = findsubject(image)
     %makes circular mask with radius r around x(1) y(1) -- outputs values
     %'testing' which is the mean pixel value in that region
 
-    cx=x(1);cy=y(1);
-    [x_3,y_3]=meshgrid(-(cx-1):(ix-cx),-(cy-1):(iy-cy));
-    c_mask_1=((x_3.^2+y_3.^2)<=r^2);
+    cx=x(1);
+    cy=y(1);
+    
+    [x_3,y_3] = meshgrid(-(cx-1):(imsz(2)-cx),-(cy-1):(imsz(1)-cy));
+    
+    c_mask_1 = ( (x_3.^2+y_3.^2) <= headrad^2);
 
 
     testing = mean(mean(c_mask_1 .* BW));
@@ -78,10 +83,10 @@ function [xy] = findsubject(image)
     cx=x(2);
     cy=y(2);
     
-    [x_3,y_3]=meshgrid(-(cx-1):(ix-cx),-(cy-1):(iy-cy));
+    [x_3,y_3] = meshgrid(-(cx-1):(imsz(2)-cx),-(cy-1):(imsz(1)-cy));
     
     
-    c_mask_2=((x_3.^2+y_3.^2)<=r^2);
+    c_mask_2 = ( (x_3.^2 + y_3.^2) <= headrad^2);
 
 
     testing2 = mean(mean(c_mask_2 .* BW));
@@ -90,27 +95,16 @@ function [xy] = findsubject(image)
     %whichever mask has a larger mean value is the head -- so make that value
     %'head_mask'
 
-%     if testing > testing2
-%         
-%         head_mask = (c_mask_1.* BW);
-%         
-%     else
-% 
-%         head_mask = (c_mask_2.* BW);
-%         
-%     end
-% 
-%     
-%     
-%     
-%     if mean(mean(STIM_region .* head_mask)) > 0 
-% 
-%         %some rule -- ie -- a pulse that goes through the DAC
-% 
-%     else
-% 
-% 
-%     end
+    if testing > testing2
+        
+        head_mask = (c_mask_1.* BW);
+        
+    else
+
+        head_mask = (c_mask_2.* BW);
+        
+    end
+
 
 
 

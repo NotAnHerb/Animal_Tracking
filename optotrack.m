@@ -101,7 +101,7 @@ mediapath = '';
 
 global haxMAIN haxMINI memos memoboxH
 
-global mainsliderh LTtrials LTframespertrial LTpixelthresh LTnpixels
+global mainsliderh LTtrials LTframespertrial LTpixelthresh LTnpixels LTheadrad
 
 
 %########################################################################
@@ -210,11 +210,22 @@ uicontrol('Parent', LivePanelH, 'Style', 'Text', 'Units', 'normalized', 'Horizon
 LTnpixels = uicontrol('Parent', LivePanelH, 'Style', 'Edit', 'Units', 'normalized', ...
     'Position', [0.55 0.40 0.35 0.09], 'FontSize', 11);
 
+uicontrol('Parent', LivePanelH, 'Style', 'Text', 'Units', 'normalized', 'HorizontalAlignment','right',...
+    'Position', [0.01 0.29 0.48 0.09], 'FontSize', 11,'String', 'Head radius:');
+LTheadrad = uicontrol('Parent', LivePanelH, 'Style', 'Edit', 'Units', 'normalized', ...
+    'Position', [0.55 0.30 0.35 0.09], 'FontSize', 11);
+
 
 set(LTtrials, 'String', int2str(5));
 set(LTframespertrial, 'String', int2str(3));
-set(LTpixelthresh, 'String', int2str(0.05));
-set(LTnpixels, 'String', int2str(100));
+set(LTpixelthresh, 'String', num2str(0.05));
+set(LTnpixels, 'String', int2str(10));
+set(LTheadrad, 'String', int2str(60));
+
+
+camclearH = uicontrol('Parent', LivePanelH, 'Units', 'normalized', ...
+    'Position', [0.05 0.10 0.90 0.15], 'FontSize', 11, 'String', 'Clear Camera',...
+    'Callback', @camclear); 
 
 
 %----------------------------------------------------
@@ -568,13 +579,37 @@ function livetracktest(boxidselecth, eventdata)
     framespertrial = str2num(LTframespertrial.String);
     pixelthresh = str2num(LTpixelthresh.String);
     npixels = str2num(LTnpixels.String);
+    headrad = str2num(LTheadrad.String);
      
 
-    livetracking(mainguih, haxMAIN, trials, framespertrial, pixelthresh, npixels);
+    livetracking(mainguih, haxMAIN, trials, framespertrial, pixelthresh,...
+        npixels, headrad, memos, memoboxH);
     
     memolog('Finished running livetracking test.')
     
 end
+
+
+
+%----------------------------------------------------
+%        CLEAR IMAGE ACQUISITION OBJECTS
+%----------------------------------------------------
+function camclear(boxidselecth, eventdata)
+    
+    memolog('Clearing image acquisition objects...')
+    
+    out = imaqfind;
+    for nn = 1:length(out)
+        stop(out(nn))
+        wait(out(nn));
+        delete(out(nn));
+    end
+    
+    
+    memolog('Done.')
+    
+end
+
 
 
 

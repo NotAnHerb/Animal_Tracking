@@ -1,19 +1,7 @@
-function [] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np)
-
+function [] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, memos, memoboxH)
 % clc; close all; clear;
 
 %% USER-ENTERED PARAMETERS
-
-% total_trials = 10;
-% 
-% framesPerTrial = 3;
-% 
-% threshmask = .50;
-% 
-% npixels = 100;  % Number of 'hot' pixels to average to find center
-
-
-
 
 total_trials = tri;
 
@@ -25,6 +13,90 @@ npixels = np;  % Number of 'hot' pixels to average to find center
 
 
 imageType = 'rgb';      % 'rgb' or 'grayscale'
+
+
+
+
+
+
+%% GET SINGLE CAMERA FRAME TO SET ROI MASKS
+
+% out = imaqfind;
+% for nn = 1:length(out)
+%     stop(out(nn))
+%     wait(out(nn));
+%     delete(out(nn));
+% end
+
+
+vidObj = videoinput('macvideo', 1, 'YCbCr422_1280x720'); % CHANGE THIS TO THERMAL DEVICE ID
+% vidObj = videoinput('winvideo', 1, 'UYVY_720x480'); % default
+src = getselectedsource(vidObj);
+
+vidObj.LoggingMode = 'memory';
+
+vidObj.ReturnedColorspace = imageType;
+
+vidObj.TriggerRepeat = 1;
+vidObj.FramesPerTrigger = 1;
+triggerconfig(vidObj, 'manual');
+
+start(vidObj);
+
+trigger(vidObj);
+[frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
+        
+
+IMG = rgb2gray(frame);
+IMG = im2double(IMG);
+
+
+stop(vidObj); 
+wait(vidObj);
+
+out = imaqfind;
+for nn = 1:length(out)
+    stop(out(nn))
+    wait(out(nn));
+    delete(out(nn));
+end
+
+
+
+%% SET ROI MASK FROM SINGLE CAM IMAGE
+
+imsz = size(IMG);
+
+axes(haxMAIN)
+ph1 = imagesc(IMG);
+set(gca,'YDir','reverse')
+haxMAIN.XLim = [1 size(IMG,2)];
+haxMAIN.YLim = [1 size(IMG,1)];
+hold on
+
+memos = memologs(memos, memoboxH, 'Click on image to create polygon area.');
+memos = memologs(memos, memoboxH, 'Right click and create mask to continue.');
+
+
+[STIM_region, STIM_region_x, STIM_region_y] = roipoly; %allows user to plot polygonal ROI
+
+hold on
+
+plot(STIM_region_x, STIM_region_y,'linewidth',10) %show ROI on plot
+
+pause(.5)
+
+memos = memologs(memos, memoboxH, 'Mask is set.');
+
+
+
+
+
+
+
+
+
+
 
 
 %% PREALLOCATE DATA COLLECTORS
@@ -97,21 +169,22 @@ for trial = 1:total_trials
         Frames(:,:,ff) = IMG;
         
         
-        xy = findsubject(IMG);
+        % GET HEAD PIXELS OF SUBJECT
+        headmask = findsubject(IMG, threshmask, headrad, imsz);
         
         
-%         % FIND ALL NON-ZERO PIXELS (PIXELS ABOVE THRESHOLD)
-%         [row,col,val] = find(IMG); 
-%         RCV = [row,col,val];
-%         
-%         % SORT BY PIXEL BRIGHTNESS (HIGH TO LOW)
-%         [YXv, index] = sortrows(RCV,-3); 
-%         
-%         % GET THE COLUMN (X) AND ROW (Y) INDEX OF THE HOTTEST PIXELS
-%         % MEAN OF THOSE PIXEL COORDINATES IS GEOMETRIC CENTER
-%         xcol = mean( YXv(1:npixels,2) );
-%         yrow = mean( imSizeY - YXv(1:npixels,1) );
-%         xy(ff,:) = [xcol yrow];
+        % FIND ALL NON-ZERO PIXELS (PIXELS ABOVE THRESHOLD)
+        [row,col,val] = find(headmask); 
+        RCV = [row,col,val];
+        
+        % SORT BY PIXEL BRIGHTNESS (HIGH TO LOW)
+        [YXv, index] = sortrows(RCV,-3); 
+        
+        % GET THE COLUMN (X) AND ROW (Y) INDEX OF THE HOTTEST PIXELS
+        % MEAN OF THOSE PIXEL COORDINATES IS GEOMETRIC CENTER
+        xcol = mean( YXv(1:npixels,2) );
+        yrow = mean( imSizeY - YXv(1:npixels,1) );
+        xy(ff,:) = [xcol yrow];
         
         ff=ff+1;
     end
@@ -197,6 +270,11 @@ ph3 = plot(xys(:,1)+2,xys(:,2)+.5,'Color',[.99 .6 .90],'LineWidth',5);
 ph3 = plot(xys(:,1),xys(:,2),'Color',[.99 .1 .75],'LineWidth',2);
 
 axis(axLims)
+
+
+
+keyboard
+
 
 % fh1=figure('Units','normalized','OuterPosition',[.1 .1 .6 .7],'Color','w','MenuBar','none');
 % 
