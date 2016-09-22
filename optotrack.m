@@ -219,7 +219,7 @@ LTheadrad = uicontrol('Parent', LivePanelH, 'Style', 'Edit', 'Units', 'normalize
 set(LTtrials, 'String', int2str(5));
 set(LTframespertrial, 'String', int2str(3));
 set(LTpixelthresh, 'String', num2str(0.05));
-set(LTnpixels, 'String', int2str(10));
+set(LTnpixels, 'String', int2str(50));
 set(LTheadrad, 'String', int2str(60));
 
 trackheadH = uicontrol('Parent', LivePanelH,'Style','checkbox','Units','normalized',...
