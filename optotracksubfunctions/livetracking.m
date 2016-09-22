@@ -96,6 +96,8 @@ for trial = 1:total_trials
         % Frames(:,:,:,ff) = IMG;
         Frames(:,:,ff) = IMG;
         
+        findsubject(IMG)
+        
         
         % FIND ALL NON-ZERO PIXELS (PIXELS ABOVE THRESHOLD)
         [row,col,val] = find(IMG); 
