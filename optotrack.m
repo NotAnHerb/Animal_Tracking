@@ -109,30 +109,67 @@ global mainsliderh LTtrials LTframespertrial LTpixelthresh LTnpixels
 %########################################################################
 
 
+%----------------------------------------------------
+%           MAIN GUI WINDOW
+%----------------------------------------------------
+
 % mainguih.CurrentCharacter = '+';
-mainguih = figure('Units', 'normalized','Position', [.1 .1 .8 .7], 'BusyAction',...
+mainguih = figure('Units', 'normalized','Position', [.05 .05 .9 .82], 'BusyAction',...
     'cancel', 'Name', 'OptoTrack', 'Tag', 'OptoTrack','Visible', 'Off'); %, ...
     %'KeyPressFcn', {@keypresszoom,1});
+    
+set(mainguih, 'Visible', 'Off');    
+    
+%----------------------------------------------------
+%           MAIN IMAGE AXES PANEL
+%----------------------------------------------------
 
-haxMAIN = axes('Parent', mainguih, 'NextPlot', 'Add',...
-    'Position', [0.01 0.02 0.60 0.93], 'PlotBoxAspectRatio', [1 1 1],...
+MAXpanelH = uipanel('Title','Viewer','FontSize',10,...
+    'BackgroundColor',[.95 .95 .95],...
+    'Position', [0.01 0.01 0.45 0.80]); % 'Visible', 'Off',
+
+haxMAIN = axes('Parent', MAXpanelH, 'NextPlot', 'Add',...
+    'Position', [0.01 0.02 0.95 0.93], 'PlotBoxAspectRatio', [1 1 1],...
     'XColor','none','YColor','none'); % 'PlotBoxAspectRatio', [1 1 1],
 
-
-
-
-mainsliderh = uicontrol('Parent', mainguih, 'Units', 'normalized','Style','slider',...
+mainsliderh = uicontrol('Parent', MAXpanelH, 'Units', 'normalized','Style','slider',...
 	'Max',50,'Min',1,'Value',10,'SliderStep',[.1 .2],...
-	'Position', [0.01 0.96 0.60 0.03], 'Callback', @mainslider);
+	'Position', [0.01 0.96 0.95 0.03], 'Callback', @mainslider);
 
 
 
-haxMINI = axes('Parent', mainguih, 'NextPlot', 'replacechildren',...
-    'Position', [0.63 0.03 0.35 0.25]); 
 
-axes(haxMAIN)
+%----------------------------------------------------
+%           MINI DATA AXES PANEL
+%----------------------------------------------------
 
-set(mainguih, 'Visible', 'Off');
+DATApanelH = uipanel('Title','Viewer','FontSize',10,...
+    'BackgroundColor',[.95 .95 .95],...
+    'Position', [0.63 0.03 0.35 0.25]); % 'Visible', 'Off',
+
+haxMINI = axes('Parent', DATApanelH, 'NextPlot', 'replacechildren',...
+    'Position', [0.01 0.01 0.98 0.98]); 
+
+
+%----------------------------------------------------
+%           MEMO CONSOLE GUI WINDOW
+%----------------------------------------------------
+
+memopanelH = uipanel('Title','Memo Log ','FontSize',10,...
+    'BackgroundColor',[.95 .95 .95],...
+    'Position', [0.01 0.82 0.45 0.17]); % 'Visible', 'Off',
+
+
+memos = {' Welcome to OptoTrack', ' ',...
+         ' Import video media to start', ' ', ...
+         ' ', ' ', ...
+         ' ', ' '};
+
+memoboxH = uicontrol('Parent',memopanelH,'Style','listbox','Units','normalized',...
+        'Max',8,'Min',0,'Value',8,'FontSize', 13,'FontName', 'FixedWidth',...
+        'String',memos,'FontWeight', 'bold',...
+        'Position',[.02 .02 .96 .96]);  
+
 
 %----------------------------------------------------
 %           IMPORTED VIDEO PROCESSING PANEL
@@ -201,25 +238,7 @@ set(LTpixelthresh, 'String', int2str(0.05));
 set(LTnpixels, 'String', int2str(100));
 
 
-%----------------------------------------------------
-%           MEMO CONSOLE GUI WINDOW
-%----------------------------------------------------
 
-memopanelH = uipanel('Title','Memo Log ','FontSize',10,...
-    'BackgroundColor',[.95 .95 .95],...
-    'Position', [0.62 0.30 0.35 0.29]); % 'Visible', 'Off',
-
-
-memos = {' Welcome to OptoTrack', ' ',...
-         ' Import video media to start', ' ', ...
-         ' ', ' ', ...
-         ' ', ' ', ...
-         ' ', ' '};
-
-memoboxH = uicontrol('Parent',memopanelH,'Style','listbox','Units','normalized',...
-        'Max',10,'Min',0,'Value',[],'FontSize', 13,'FontName', 'FixedWidth',...
-        'String',memos,'FontWeight', 'bold',...
-        'Position',[.02 .02 .96 .96]);  
 
 
 
@@ -230,6 +249,9 @@ memoboxH = uicontrol('Parent',memopanelH,'Style','listbox','Units','normalized',
 %----------------------------------------------------
 %     INITIALIZE TOOLBOX PARAMETERS
 %----------------------------------------------------
+
+
+axes(haxMAIN)
 
 OPTOTRACKgo()
 
@@ -260,27 +282,10 @@ function OPTOTRACKgo()
     % set(mainguih, 'Visible', 'On');
     
     
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Welcome to OptoTrack';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
+    memolog('Welcome to OptoTrack')
+    memolog('Optogenetics & Behavior Analysis Toolbox')
+    memolog('Loading GUI interface...')
     
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Optogenetics & Behavior Analysis Toolbox';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
-    
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Loading GUI interface...';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
-
     
     iminfo = imfinfo('optotracklogo.png');
     [im, map] = imread('optotracklogo.png');
@@ -333,13 +338,8 @@ function OPTOTRACKgo()
     set(haxMAIN, 'XLim', [1 xdim]);
     set(haxMAIN, 'YLim', [1 ydim]);
     %----------------------------------------------------
-    
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'OptoTrack is ready!';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
+        
+    memolog('OptoTrack is ready!')
     
     drawnow
     
@@ -347,6 +347,19 @@ function OPTOTRACKgo()
 end
 
 
+
+
+%----------------------------------------------------
+%        MEMO LOG UPDATE
+%----------------------------------------------------
+function memolog(spf)
+
+    memos(1:end-1) = memos(2:end);
+    memos{end} = spf;
+    memoboxH.String = memos;
+    pause(.02)
+
+end
 
 
 %----------------------------------------------------
@@ -485,7 +498,7 @@ end
 %----------------------------------------------------
 function mainslider(hObject, eventdata)
 
-    slideVal = ceil(cmapsliderH.Value);
+    slideVal = ceil(mainsliderh.Value);
 
     ccmap = parula;
     
