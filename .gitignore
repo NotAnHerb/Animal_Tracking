@@ -15,5 +15,7 @@ testdata
 testdata/*
 archive
 archive/*
+newcode
+newcode/*
 # driversinstalls
 # driversinstalls/*
