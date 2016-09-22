@@ -407,13 +407,8 @@ end
 %        IMPORT VIDEO PATH INFORMATION
 %----------------------------------------------------
 function getvid(boxidselecth, eventdata)
-    
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Select video to import';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
+        
+    memolog('Select video to import')
     
     if numel(mediapath) < 1
         [datafile, datapath, ~] = uigetfile({'*.mp4; *.mov'}, 'Select video.');
@@ -422,14 +417,8 @@ function getvid(boxidselecth, eventdata)
     mediapath = [datapath datafile];    
 
 
-    % READ VIDEO INTO FRAME DATA
-    
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Reading video data...';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
+    % READ VIDEO INTO FRAME DATA    
+    memolog('Reading video data...')
 
     VID = VideoReader(mediapath);				% import vid
     nf = get(VID, 'NumberOfFrames');			% get total number of vid frames
@@ -445,13 +434,8 @@ function getvid(boxidselecth, eventdata)
     ydim = size(v1,1);
     set(haxMAIN, 'XLim', [1 xdim]);
     set(haxMAIN, 'YLim', [1 ydim]);
-    
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Done.';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
+        
+    memolog('Done reading video data.')
 
 
 end
@@ -463,26 +447,49 @@ end
 %        GET FRAMES OUTPUT STRUCTURE FROM IRframes()
 %----------------------------------------------------
 function getframes(boxidselecth, eventdata)
+        
+    memolog('Running IRframes() function.')
+    memolog('Please wait...')
     
     
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Running IRframes() function...';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
     
     [outputstructure] = IRframes(VID, mediapath);
     
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Retrieved output structure.';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
-    
-    disp(outputstructure)
+    fnams = fieldnames(outputstructure);
 
+    
+    
+    % ---- This is all just memo log stuff ---
+    memolog('Retrieved output structure.')
+
+    disp(outputstructure)
+    
+    spf0 = 'outputstructure.';
+    spf1 = ['  '... 
+    fnams{1} '     '...
+    num2str(size(outputstructure.(fnams{1}))) '  '...
+    class(outputstructure.(fnams{1}))...
+    ];
+    spf2 = ['  '... 
+    fnams{2} '     '...
+    num2str(size(outputstructure.(fnams{2}))) '  '...
+    class(outputstructure.(fnams{2}))...
+    ];
+    spf3 = ['  '... 
+    fnams{3} '  '...
+    num2str(size(outputstructure.(fnams{3}))) '  '...
+    class(outputstructure.(fnams{3}))...
+    ];
+
+    memolog('  ')
+    memolog(spf0)
+    memolog(spf1)
+    memolog(spf2)
+    memolog(spf3)
+    memolog('  ')
+    memolog('Done!')
+    % -----------------------------------------
+    
 end
 
 
@@ -495,14 +502,13 @@ end
 function runtracking(boxidselecth, eventdata)
     
     
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Running IRtrack() function...';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
+    memolog('Running IRtrack() function.')
+    memolog('Please wait...')
     
     IRtrack(outputstructure);
+    
+    
+    memolog('Done!')
 
 end
 
