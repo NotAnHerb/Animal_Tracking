@@ -138,19 +138,6 @@ mainsliderh = uicontrol('Parent', MAXpanelH, 'Units', 'normalized','Style','slid
 
 
 
-
-%----------------------------------------------------
-%           MINI DATA AXES PANEL
-%----------------------------------------------------
-
-DATApanelH = uipanel('Title','Viewer','FontSize',10,...
-    'BackgroundColor',[.95 .95 .95],...
-    'Position', [0.63 0.03 0.35 0.25]); % 'Visible', 'Off',
-
-haxMINI = axes('Parent', DATApanelH, 'NextPlot', 'replacechildren',...
-    'Position', [0.01 0.01 0.98 0.98]); 
-
-
 %----------------------------------------------------
 %           MEMO CONSOLE GUI WINDOW
 %----------------------------------------------------
@@ -171,30 +158,22 @@ memoboxH = uicontrol('Parent',memopanelH,'Style','listbox','Units','normalized',
         'Position',[.02 .02 .96 .96]);  
 
 
+
 %----------------------------------------------------
-%           IMPORTED VIDEO PROCESSING PANEL
+%           MINI DATA AXES PANEL
 %----------------------------------------------------
-IPpanelH = uipanel('Title','Video Processing','FontSize',10,...
+
+DATApanelH = uipanel('Title','Data Viewer','FontSize',10,...
     'BackgroundColor',[.95 .95 .95],...
-    'Position', [0.62 0.60 0.17 0.39]); % 'Visible', 'Off',
+    'Position', [0.47 0.01 0.52 0.23]); % 'Visible', 'Off',
 
+haxMINI = axes('Parent', DATApanelH, 'NextPlot', 'replacechildren',...
+    'FontSize', 8,'Color','none',...
+    'Position', [0.03 0.08 0.47 0.90]); 
 
-getvidh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
-    'Position', [0.05 0.80 0.90 0.15], 'FontSize', 11, 'String', 'Import Video',...
-    'Callback', @getvid); 
-
-getframesh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
-    'Position', [0.05 0.60 0.90 0.15], 'FontSize', 11, 'String', 'Get Frames',...
-    'Callback', @getframes); 
-
-runtrackingh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
-    'Position', [0.05 0.40 0.90 0.15], 'FontSize', 11, 'String', 'Perform Tracking',...
-    'Callback', @runtracking); 
-
-runcustomh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
-    'Position', [0.05 0.20 0.90 0.15], 'FontSize', 11, 'String', 'Custom Function',...
-    'Callback', @runcustom); 
-
+haxMINIL = axes('Parent', DATApanelH, 'NextPlot', 'replacechildren',...
+    'FontSize', 8,'Color','none',...
+    'Position', [0.52 0.08 0.47 0.90]); 
 
 
 
@@ -203,7 +182,7 @@ runcustomh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
 %----------------------------------------------------
 LivePanelH = uipanel('Title','Live Tracking','FontSize',10,...
     'BackgroundColor',[.95 .95 .95],...
-    'Position', [0.81 0.60 0.17 0.39]); % 'Visible', 'Off',
+    'Position', [0.47 0.25 0.17 0.36]); % 'Visible', 'Off',
 
 
 livetrackh = uicontrol('Parent', LivePanelH, 'Units', 'normalized', ...
@@ -238,7 +217,69 @@ set(LTpixelthresh, 'String', int2str(0.05));
 set(LTnpixels, 'String', int2str(100));
 
 
+%----------------------------------------------------
+%           IMPORTED VIDEO PROCESSING PANEL
+%----------------------------------------------------
+IPpanelH = uipanel('Title','Video Processing','FontSize',10,...
+    'BackgroundColor',[.95 .95 .95],...
+    'Position', [0.47 0.62 0.17 0.36]); % 'Visible', 'Off',
 
+
+getvidh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
+    'Position', [0.05 0.80 0.90 0.15], 'FontSize', 11, 'String', 'Import Video',...
+    'Callback', @getvid); 
+
+getframesh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
+    'Position', [0.05 0.60 0.90 0.15], 'FontSize', 11, 'String', 'Get Frames',...
+    'Callback', @getframes); 
+
+runtrackingh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
+    'Position', [0.05 0.40 0.90 0.15], 'FontSize', 11, 'String', 'Perform Tracking',...
+    'Callback', @runtracking); 
+
+runcustomh = uicontrol('Parent', IPpanelH, 'Units', 'normalized', ...
+    'Position', [0.05 0.20 0.90 0.15], 'FontSize', 11, 'String', 'Custom Function',...
+    'Callback', @runcustom); 
+
+
+
+
+%----------------------------------------------------
+%          GUI PANEL 4
+%----------------------------------------------------
+GUIpanel4H = uipanel('Title','GUI PANEL 4','FontSize',10,...
+    'BackgroundColor',[.95 .95 .95],...
+    'Position', [0.65 0.25 0.17 0.36]); % 'Visible', 'Off',
+
+
+
+
+%----------------------------------------------------
+%           GUI PANEL 5
+%----------------------------------------------------
+GUIpanel5H = uipanel('Title','GUI PANEL 5','FontSize',10,...
+    'BackgroundColor',[.95 .95 .95],...
+    'Position', [0.65 0.62 0.17 0.36]); % 'Visible', 'Off',
+
+
+
+
+%----------------------------------------------------
+%          GUI PANEL 6
+%----------------------------------------------------
+GUIpanel6H = uipanel('Title','GUI PANEL 6','FontSize',10,...
+    'BackgroundColor',[.95 .95 .95],...
+    'Position', [0.83 0.25 0.16 0.36]); % 'Visible', 'Off',
+
+
+
+
+%----------------------------------------------------
+%           GUI PANEL 7
+%----------------------------------------------------
+GUIpanel7H = uipanel('Title','GUI PANEL 7','FontSize',10,...
+    'BackgroundColor',[.95 .95 .95],...
+    'Position', [0.83 0.62 0.16 0.36]); % 'Visible', 'Off',
 
 
 
