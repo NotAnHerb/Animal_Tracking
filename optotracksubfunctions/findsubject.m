@@ -1,4 +1,4 @@
-function [] = findsubject(image)
+function [xy] = findsubject(image)
 
 
 

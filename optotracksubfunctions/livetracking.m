@@ -96,21 +96,22 @@ for trial = 1:total_trials
         % Frames(:,:,:,ff) = IMG;
         Frames(:,:,ff) = IMG;
         
-        findsubject(IMG)
+        
+        xy = findsubject(IMG);
         
         
-        % FIND ALL NON-ZERO PIXELS (PIXELS ABOVE THRESHOLD)
-        [row,col,val] = find(IMG); 
-        RCV = [row,col,val];
-        
-        % SORT BY PIXEL BRIGHTNESS (HIGH TO LOW)
-        [YXv, index] = sortrows(RCV,-3); 
-        
-        % GET THE COLUMN (X) AND ROW (Y) INDEX OF THE HOTTEST PIXELS
-        % MEAN OF THOSE PIXEL COORDINATES IS GEOMETRIC CENTER
-        xcol = mean( YXv(1:npixels,2) );
-        yrow = mean( imSizeY - YXv(1:npixels,1) );
-        xy(ff,:) = [xcol yrow];
+%         % FIND ALL NON-ZERO PIXELS (PIXELS ABOVE THRESHOLD)
+%         [row,col,val] = find(IMG); 
+%         RCV = [row,col,val];
+%         
+%         % SORT BY PIXEL BRIGHTNESS (HIGH TO LOW)
+%         [YXv, index] = sortrows(RCV,-3); 
+%         
+%         % GET THE COLUMN (X) AND ROW (Y) INDEX OF THE HOTTEST PIXELS
+%         % MEAN OF THOSE PIXEL COORDINATES IS GEOMETRIC CENTER
+%         xcol = mean( YXv(1:npixels,2) );
+%         yrow = mean( imSizeY - YXv(1:npixels,1) );
+%         xy(ff,:) = [xcol yrow];
         
         ff=ff+1;
     end
