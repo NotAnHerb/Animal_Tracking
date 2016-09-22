@@ -322,7 +322,7 @@ function OPTOTRACKgo()
     
     % set(mainguih, 'Visible', 'On');
     
-    
+    % memos = memologs(memos, memoboxH, 'Welcome to OptoTrack');
     memolog('Welcome to OptoTrack')
     memolog('Optogenetics & Behavior Analysis Toolbox')
     memolog('Loading GUI interface...')
@@ -505,7 +505,7 @@ function runtracking(boxidselecth, eventdata)
     memolog('Running IRtrack() function.')
     memolog('Please wait...')
     
-    IRtrack(outputstructure);
+    [memos] = IRtrack(outputstructure, memos, memoboxH);
     
     
     memolog('Done!')
@@ -520,14 +520,8 @@ end
 %----------------------------------------------------
 function runcustom(boxidselecth, eventdata)
     
-    
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Running IRtrack() function...';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
-    
+    memolog('Running IRtrack() function...')
+        
     IRtrack(VID, mediapath);
 
 end
@@ -566,13 +560,8 @@ end
 %----------------------------------------------------
 function livetracktest(boxidselecth, eventdata)
     
+    memolog('Running livetracking() function test...')
     
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Running livetracking() function test...';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
     
     
     trials = str2num(LTtrials.String);
@@ -583,13 +572,8 @@ function livetracktest(boxidselecth, eventdata)
 
     livetracking(mainguih, haxMAIN, trials, framespertrial, pixelthresh, npixels);
     
-    % ------  
-    memos(1:end-1) = memos(2:end);
-    memos{end} = 'Finished running livetracking test.';
-    memoboxH.String = memos;
-    pause(.02)
-    % ------
-
+    memolog('Finished running livetracking test.')
+    
 end
 
 

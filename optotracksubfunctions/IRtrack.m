@@ -1,4 +1,4 @@
-function [] = IRtrack(outputstructure)
+function [memos] = IRtrack(outputstructure, memos, memoboxH)
 %TRACK'S ANIMAL'S HEAD
 
 
@@ -45,9 +45,19 @@ function [] = IRtrack(outputstructure)
 
 imagesc(outputstructure.image{1}) %plots first image from a recorded file
 
+
+memos = memologs(memos, memoboxH, 'Click on image to create polygon area.');
+memos = memologs(memos, memoboxH, 'Right click and copy position to continue.');
+
+
 [STIM_region, STIM_region_x, STIM_region_y] = roipoly; %allows user to plot polygonal ROI
 hold on
 plot(STIM_region_x, STIM_region_y,'linewidth',10) %show ROI on plot
+
+memos = memologs(memos, memoboxH, 'ROI set!');
+
+keyboard
+
 
 %%
 
@@ -74,6 +84,8 @@ threshold = 98;
 
 
     for i = 1:2:n_frames
+        
+        disp(i)
 
         %thresholds image
         image = outputstructure.image{i};
