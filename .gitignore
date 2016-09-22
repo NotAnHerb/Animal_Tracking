@@ -15,5 +15,5 @@ testdata
 testdata/*
 archive
 archive/*
-driversinstalls
-driversinstalls/*
+# driversinstalls
+# driversinstalls/*
