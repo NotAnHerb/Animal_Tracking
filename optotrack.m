@@ -1,5 +1,5 @@
 function varargout = optotrack(varargin)
-%% optotrack.m - Optogenetics and Behavioral Assay Toolbox
+%% optotrack.m - Optogenetics and Live Tracking Toolbox
 %{
 % 
 % Syntax
@@ -10,58 +10,64 @@ function varargout = optotrack(varargin)
 % Description
 % -----------------------------------------------------
 % 
-%     neuromorph() is run with no arguments passed in. The user
-%     will be prompted to select a directory which contains the image data
-%     tif stack along with the corresponding xls file.
+%     optotrack() The optotrack program is run from optotrack.m that initializes 
+%     a GUI interface, and strings together to several video processing functions. 
+%     First it runs the IRframes() function to perform basic tracking. This involves 
+%     finding the nth hottest pixels and takes their centroid as the location of the 
+%     animal. Despite its simplicity, it works fairly well -- mostly tracking the 
+%     animal's head due to the heat radiating off the headcap. It outputs tracking 
+%     data (xy), speed (dL), as well as the first frame of the video (image) to draw 
+%     ROIs. After that, IRtrack() function is called, which tracks the animal using 
+%     some tools from MATLAB's image analysis toolbox.
+%
+%     This program allows users to import video data from an infrared camera and
+%     track an animal within that video. Input is the filename of a video in
+%     the MATLAB path and it outputs into a data structure:
+%       xy -- x and y coordinates
+%       dL -- speed
+%       image -- matrix of first frame for ROI analysis later on
 %     
 % 
 % Useage Definitions
 % -----------------------------------------------------
 % 
-%     neuromorph()
-%         launches a GUI to process image stack data from GRIN lens
-%         experiments
+%     optotrack()
+%         launches a GUI to perform live open field animal tracking
 %  
 % 
 % 
 % Example
 % -----------------------------------------------------
 % 
-%     TBD
+%    [Arena_Data.AUG09.LH1] = IRheattracking_3('080916_LHALHB_1.mp4')
+%       It takes some time to run (minutes) so it is best to run in batches. 
 % 
 % 
 % See Also
 % -----------------------------------------------------
-% >> web('http://bradleymonk.com/neuromorph')
-% >> web('http://imagej.net/Miji')
-% >> web('http://bigwww.epfl.ch/sage/soft/mij/')
+% >> web('https://github.com/NotAnHerb/Animal_Tracking')
+% >> web('http://bradleymonk.com/optotrack')
+% >> web('http://malinowlab.com')
 % 
 % 
 % Attribution
 % -----------------------------------------------------
-% % Created by: Bradley Monk
-% % email: brad.monk@gmail.com
-% % website: bradleymonk.com
-% % 2016.07.04
+% % Created by: Sage Aronson & Bradley Monk
+% % Malinow Lab - UC San Diego
+% % email: sage.r.aronson@gmail.com
+% % brad.monk@gmail.com
+% % website: malinowlab.com
+% % 2016.09.01
 %}
 %----------------------------------------------------
 
-%This program allows users to import video data from an infrared camera and
-%track an animal within that video. Input is the filename of a video in
-%the MATLAB path and it outputs into a data structure:
-%  xy -- x and y coordinates
-%  dL -- speed
-%  image -- matrix of first frame for ROI analysis later on
 
-%Example: [Arena_Data.AUG09.LH1] = IRheattracking_3('080916_LHALHB_1.mp4')
-
-%It takes some time to run (minutes) so it is best to run in batches. 
 
 
 %% ESTABLISH STARTING PATHS
-clc; close all; clear all; clear java;
+clc; close all; clear; clear java;
 
-disp('WELCOME TO OPTOTRACK - Optogenetics and Behavioral Assay Toolbox')
+disp('WELCOME TO OPTOTRACK - Optogenetics and Live Tracking Toolbox.')
 
 
 global thisfilepath
