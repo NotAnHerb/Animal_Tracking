@@ -1,6 +1,6 @@
+function [] = daqjack(varargin)
 
-
-clc; close all; clear;
+% clc; close all; clear;
 
 
 SampleRateHz = 250;
@@ -58,11 +58,7 @@ startStream(lbj);
 
 for t = 1:TimeValue*SampleRateHz
 
-    
-    
     analogOut(lbj,channel,yv(t));
-
-
 
     pause(1/SampleRateHz)
 
@@ -76,5 +72,5 @@ stopStream(lbj);
 
 clear lbj
 
-
+end
 
