@@ -64,13 +64,6 @@ f1dat = {zeros(szf)};
 framedat = repmat(f1dat,1,nFrms);
 
 
-fh1=figure('Units','normalized','OuterPosition',[.1 .1 .8 .8],'Color','w','MenuBar','none');
-hax1 = axes('Position',[.02 .02 .95 .95],'Color','none','XTick',[],'YTick',[],...
-    'NextPlot','replacechildren', 'XColor','none','YColor','none', 'PlotBoxAspectRatio', [1 1 1]);
-
-% imagesc(f1); % plot frame-1 data
-
-
 % GET FRAME DATA
 
 clear f
@@ -101,11 +94,11 @@ threshmask = 100; %again -- vestigial -- as program picks the hottest pixel valu
 % nFrms = numel(1:SkpFrm:nf);
 
 n_pixels = zeros(nFrms,NumMasks); %initializes
-mu = n_pixels;
-sd = n_pixels;
-mupix = n_pixels;
-
-pixelvals{nFrms,NumMasks} = [];
+% mu = n_pixels;
+% sd = n_pixels;
+% mupix = n_pixels;
+% 
+% pixelvals{nFrms,NumMasks} = [];
 
 imgsz = size(f1);
 imgszY = imgsz(1)+1;
@@ -145,48 +138,8 @@ for mm = 1:numel(framedat)
 end
 
 xy = [xloc yloc]; %saves data
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-% OPTIONAL: Play VIDEO overlaying tracking position over rat to check accuracy
-% close all
-% 
-% fh1 = figure(1);
-% set(fh1,'Position',[100 200 600 500],'Color','w');
-% hax1=axes('Position',[.07 .1 .8 .8],'Color','none','NextPlot','replacechildren');
-% hax2=axes('Position',[.07 .1 .8 .8],'Color','none','NextPlot','replacechildren');
-% 
-% 
-%     axes(hax1)
-%     imagesc(framedat{nn})
-%     set(gca,'YDir','reverse')
-%     hold on
-%     
-%     axLims = axis;
-%     
-%     axes(hax2)
-%     scatter(xloc(nn),yloc(nn),100,'filled','MarkerFaceColor',[.9 .1 .1]);
-%     axis(axLims)
-%     hold on
-% 
-% for nn=1:numel(framedat)
-%     
-%     delete(hax1.Children); delete(hax2.Children);
-%     
-%     imagesc(framedat{nn},'Parent', hax1)
-%     
-%     scatter(hax2, xloc(nn),yloc(nn),250,'filled','r');
-%     
-%     pause(.1)
-%     
-%     nn/60
-%     
-% end
-
-
-
-% COMPUTE TOTAL DISTANCE 
+%% COMPUTE TOTAL DISTANCE 
 
 % 'xloc' contains vector of x-coordinate positions
 % 'yloc' contains vector of y-coordinate positions
@@ -202,88 +155,8 @@ for dt = 1:numel(xloc)-1
 
 end
 
-bigL = dL > 10;
-
-bdL = dL(bigL);
-
-sdL = dL(~bigL);
-
-
-
-% 
-% totalDist = sum(dL);
-% meanDist = mean(dL);
-% stdDist = std(dL);
-% semDist = stdDist / sqrt(numel(dL));
-% 
-% SPF1 = sprintf('  TOTAL AMBULATORY DISTANCE: % 5.6g au \r',totalDist);
-% SPF2 = sprintf('  MEAN AMBULATORY DISTANCE: % 5.4g au \r',meanDist);
-% SPF3 = sprintf('  STDEV AMBULATORY DISTANCE: % 5.4g au \r',stdDist);
-% SPF4 = sprintf('  SEM AMBULATORY DISTANCE: % 5.4g au \r',semDist);
-% 
-% disp(' ')
-% disp([SPF1, SPF2, SPF3, SPF4])
-
-
-% BIN DATA - COMPUTE SUM AND MEAN FOR EACH BIN
-
-% nbins = 40;
-% subs = round(linspace(1,nbins,numel(dL))); % subs(end) = nbins;
-% BinSumD = accumarray(subs',dL,[],@sum);
-% BinAveD = accumarray(subs',dL,[],@mean);
-% 
-% 
-% 
-
-
-
-% PLOT DATA
-
-% fh1=figure('Position',[100 200 1100 500],'Color','w');
-% hax1=axes('Position',[.07 .1 .4 .8],'Color','none');
-% hax2=axes('Position',[.55 .1 .4 .8],'Color','none');
-% 
-%     axes(hax1)
-% ph1 = plot(xloc,yloc);
-%     set(ph1,'LineStyle','-','Color',[.9 .2 .2],'LineWidth',2);
-% 
-%     axes(hax2)
-% ph2 = plot(BinSumD);
-%     set(ph1,'LineStyle','-','Color',[.9 .2 .2],'LineWidth',2);
-%     axis tight
-% % 
-% % 
-% %     fh2=figure('Position',[100 200 1100 500],'Color','w');
-% % hax3=axes('Position',[.07 .1 .4 .8],'Color','none');
-% % hax4=axes('Position',[.55 .1 .4 .8],'Color','none');
-% % 
-% %     axes(hax3)
-% % ph3 = plot(bdL);
-% %     set(ph3,'LineStyle','-','Color',[.9 .2 .2],'LineWidth',2);
-% % 
-%     axes(hax4)
-% ph4 = plot(sdL);
-%     set(ph4,'LineStyle','-','Color',[.9 .2 .2],'LineWidth',2);
-%     %axis tight
-% 
-
-
-% % ADDITIONAL PLOTS
-% 
-% % Moving average wts = [1/10;repmat(1/5,4,1);1/10]; L =
-% conv(dL,wts,'valid'); plot(L,'r','LineWidth',2);
-% 
-
-close(fh1)
-
-% Save into structure
-
 outputstructure.dL = dL;
 outputstructure.xy = xy;
 outputstructure.image = framedat;
 
-%
-% figure
-% gkde2(xy(360:end,:))
-
-
+end
