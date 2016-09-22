@@ -1,4 +1,4 @@
-function [] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, memos, memoboxH)
+function [] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
 % clc; close all; clear;
 
 %% USER-ENTERED PARAMETERS
@@ -170,12 +170,26 @@ for trial = 1:total_trials
         
         
         % GET HEAD PIXELS OF SUBJECT
-        headmask = findsubject(IMG, threshmask, headrad, imsz);
+        if trackhead
+            
+            headmask = findsubject(IMG, threshmask, headrad, imsz);
         
         
-        % FIND ALL NON-ZERO PIXELS (PIXELS ABOVE THRESHOLD)
-        [row,col,val] = find(headmask); 
-        RCV = [row,col,val];
+            % FIND ALL NON-ZERO PIXELS (PIXELS ABOVE THRESHOLD)
+            [row,col,val] = find(headmask); 
+            RCV = [row,col,val];
+        
+        else
+            
+            % FIND ALL NON-ZERO PIXELS (PIXELS ABOVE THRESHOLD)
+            [row,col,val] = find(IMG); 
+            RCV = [row,col,val];
+            
+        
+        end
+        
+        
+        
         
         % SORT BY PIXEL BRIGHTNESS (HIGH TO LOW)
         [YXv, index] = sortrows(RCV,-3); 
@@ -272,8 +286,6 @@ ph3 = plot(xys(:,1),xys(:,2),'Color',[.99 .1 .75],'LineWidth',2);
 axis(axLims)
 
 
-
-keyboard
 
 
 % fh1=figure('Units','normalized','OuterPosition',[.1 .1 .6 .7],'Color','w','MenuBar','none');

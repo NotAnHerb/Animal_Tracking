@@ -99,7 +99,7 @@ mediapath = '';
 
 %% ESTABLISH GLOBALS AND SET STARTING VALUES
 
-global haxMAIN haxMINI memos memoboxH
+global haxMAIN haxMINI memos memoboxH trackheadH
 
 global mainsliderh LTtrials LTframespertrial LTpixelthresh LTnpixels LTheadrad
 
@@ -222,10 +222,9 @@ set(LTpixelthresh, 'String', num2str(0.05));
 set(LTnpixels, 'String', int2str(10));
 set(LTheadrad, 'String', int2str(60));
 
+trackheadH = uicontrol('Parent', LivePanelH,'Style','checkbox','Units','normalized',...
+    'Position', [0.05 0.05 0.90 0.10] ,'String','Track Head', 'Value',1);
 
-camclearH = uicontrol('Parent', LivePanelH, 'Units', 'normalized', ...
-    'Position', [0.05 0.10 0.90 0.15], 'FontSize', 11, 'String', 'Clear Camera',...
-    'Callback', @camclear); 
 
 
 %----------------------------------------------------
@@ -262,7 +261,9 @@ GUIpanel4H = uipanel('Title','GUI PANEL 4','FontSize',10,...
     'BackgroundColor',[.95 .95 .95],...
     'Position', [0.65 0.25 0.17 0.36]); % 'Visible', 'Off',
 
-
+camclearH = uicontrol('Parent', GUIpanel4H, 'Units', 'normalized', ...
+    'Position', [0.05 0.05 0.90 0.15], 'FontSize', 11, 'String', 'Clear Camera',...
+    'Callback', @camclear); 
 
 
 %----------------------------------------------------
@@ -580,10 +581,12 @@ function livetracktest(boxidselecth, eventdata)
     pixelthresh = str2num(LTpixelthresh.String);
     npixels = str2num(LTnpixels.String);
     headrad = str2num(LTheadrad.String);
+    
+    trackhead = trackheadH.Value;
      
 
     livetracking(mainguih, haxMAIN, trials, framespertrial, pixelthresh,...
-        npixels, headrad, memos, memoboxH);
+        npixels, headrad, trackhead, memos, memoboxH);
     
     memolog('Finished running livetracking test.')
     
