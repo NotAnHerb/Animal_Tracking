@@ -47,16 +47,14 @@ imagesc(outputstructure.image{1}) %plots first image from a recorded file
 
 
 memos = memologs(memos, memoboxH, 'Click on image to create polygon area.');
-memos = memologs(memos, memoboxH, 'Right click and copy position to continue.');
+memos = memologs(memos, memoboxH, 'Right click and create mask to continue.');
 
 
 [STIM_region, STIM_region_x, STIM_region_y] = roipoly; %allows user to plot polygonal ROI
 hold on
 plot(STIM_region_x, STIM_region_y,'linewidth',10) %show ROI on plot
 
-memos = memologs(memos, memoboxH, 'ROI set!');
-
-keyboard
+memos = memologs(memos, memoboxH, 'Mask is set.');
 
 
 %%
