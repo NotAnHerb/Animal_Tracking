@@ -101,7 +101,7 @@ hold on
 
 plot(STIM_region_x, STIM_region_y,'linewidth',10) %show ROI on plot
 
-pause(.5)
+pause(.001)
 
 memos = memologs(memos, memoboxH, 'Mask is set.');
 
@@ -185,7 +185,9 @@ for trial = 1:total_trials
     
     for nn = 1:framesPerTrial
         
+
         % pause(.001)
+
         trigger(vidObj);
         [frame, ~] = getdata(vidObj, vidObj.FramesPerTrigger);
         
@@ -224,9 +226,7 @@ for trial = 1:total_trials
 %             drawnow
 %             pause(.001)
 %             % ----
-            
-
-                    
+                                
         else
             
             % FIND ALL NON-ZERO PIXELS (PIXELS ABOVE THRESHOLD)
@@ -338,7 +338,7 @@ if ~trackhead
         ph3.XData = xys(1:mm,1);
         ph3.YData = xys(1:mm,2);
 
-        pause(.2)
+        pause(.001)
 
         mm = nn*100-1;
     end
