@@ -102,7 +102,7 @@ mediapath = '';
 global haxMAIN haxMINI memos memoboxH trackheadH
 
 global mainsliderh LTtrials LTframespertrial LTpixelthresh LTnpixels LTheadrad
-
+global testThreshH
 
 %########################################################################
 %%              MAIN ANALYSIS GUI WINDOW SETUP 
@@ -218,7 +218,7 @@ LTheadrad = uicontrol('Parent', LivePanelH, 'Style', 'Edit', 'Units', 'normalize
 
 set(LTtrials, 'String', int2str(5));
 set(LTframespertrial, 'String', int2str(3));
-set(LTpixelthresh, 'String', num2str(0.05));
+set(LTpixelthresh, 'String', num2str(0.25));
 set(LTnpixels, 'String', int2str(50));
 set(LTheadrad, 'String', int2str(60));
 
@@ -264,6 +264,25 @@ GUIpanel4H = uipanel('Title','GUI PANEL 4','FontSize',10,...
 camclearH = uicontrol('Parent', GUIpanel4H, 'Units', 'normalized', ...
     'Position', [0.05 0.05 0.90 0.15], 'FontSize', 11, 'String', 'Clear Camera',...
     'Callback', @camclear); 
+
+
+gethistogramH = uicontrol('Parent', GUIpanel4H, 'Units', 'normalized', ...
+    'Position', [0.05 0.25 0.90 0.15], 'FontSize', 11, 'String', 'Get Pixel Histogram',...
+    'Callback', @gethistogram);
+
+
+testpixthreshH = uicontrol('Parent', GUIpanel4H, 'Units', 'normalized', ...
+    'Position', [0.05 0.45 0.50 0.15], 'FontSize', 11, 'String', 'Test Pixel Thresh',...
+    'Callback', @testpixthresh); 
+
+uicontrol('Parent', GUIpanel4H, 'Style', 'Text', 'Units', 'normalized', 'HorizontalAlignment','right',...
+    'Position', [0.57 0.53 0.35 0.09], 'FontSize', 10,'String', 'Test Threshold');
+testThreshH = uicontrol('Parent', GUIpanel4H, 'Style', 'Edit', 'Units', 'normalized', ...
+    'Position', [0.58 0.46 0.35 0.09], 'FontSize', 11);
+
+set(testThreshH, 'String', num2str(0.50));
+
+
 
 
 %----------------------------------------------------
@@ -615,6 +634,194 @@ end
 
 
 
+
+%----------------------------------------------------
+%        GET PIXEL HISTOGRAM
+%----------------------------------------------------
+function gethistogram(boxidselecth, eventdata)
+    
+    memolog('Creating pixel histogram...')
+    
+%% GET SINGLE CAMERA FRAME TO SET ROI MASKS
+
+out = imaqfind;
+for nn = 1:length(out)
+    stop(out(nn))
+    wait(out(nn));
+    delete(out(nn));
+    
+    clear vidObj src
+end
+
+
+imageType = 'rgb';      % 'rgb' or 'grayscale'
+
+vidObj = videoinput('macvideo', 1, 'YCbCr422_1280x720'); % CHANGE THIS TO THERMAL DEVICE ID
+% vidObj = videoinput('winvideo', 1, 'UYVY_720x480'); % default
+src = getselectedsource(vidObj);
+
+vidObj.LoggingMode = 'memory';
+
+vidObj.ReturnedColorspace = imageType;
+
+vidObj.TriggerRepeat = 2;
+vidObj.FramesPerTrigger = 1;
+triggerconfig(vidObj, 'manual');
+
+start(vidObj);
+
+trigger(vidObj);
+[frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
+
+trigger(vidObj);
+[frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
+        
+
+IMG = rgb2gray(frame);
+IMG = im2double(IMG);
+
+
+stop(vidObj); 
+wait(vidObj);
+
+out = imaqfind;
+for nn = 1:length(out)
+    stop(out(nn))
+    wait(out(nn));
+    delete(out(nn));
+end
+    
+
+
+
+
+
+imsz = size(IMG);
+
+axes(haxMAIN)
+ph1 = imagesc(IMG);
+set(gca,'YDir','reverse')
+haxMAIN.XLim = [1 size(IMG,2)];
+haxMAIN.YLim = [1 size(IMG,1)];
+
+
+axes(haxMINI)
+histogram(IMG(:))
+
+
+I50 = prctile(IMG(:),50);
+temp1 = IMG(IMG>I50);
+
+testThresh = str2num(testThreshH.String);
+
+axes(haxMINIL)
+histogram(IMG(IMG>testThresh))
+
+    memolog('Done')
+    
+end
+
+
+
+
+
+%----------------------------------------------------
+%        GET PIXEL HISTOGRAM
+%----------------------------------------------------
+function testpixthresh(boxidselecth, eventdata)
+    
+    memolog('Creating pixel histogram...')
+    
+%% GET SINGLE CAMERA FRAME TO SET ROI MASKS
+
+out = imaqfind;
+for nn = 1:length(out)
+    stop(out(nn))
+    wait(out(nn));
+    delete(out(nn));
+    
+    clear vidObj src
+end
+
+
+imageType = 'rgb';      % 'rgb' or 'grayscale'
+
+vidObj = videoinput('macvideo', 1, 'YCbCr422_1280x720'); % CHANGE THIS TO THERMAL DEVICE ID
+% vidObj = videoinput('winvideo', 1, 'UYVY_720x480'); % default
+src = getselectedsource(vidObj);
+
+vidObj.LoggingMode = 'memory';
+
+vidObj.ReturnedColorspace = imageType;
+
+vidObj.TriggerRepeat = 2;
+vidObj.FramesPerTrigger = 1;
+triggerconfig(vidObj, 'manual');
+
+start(vidObj);
+
+trigger(vidObj);
+[frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
+
+trigger(vidObj);
+[frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
+        
+
+IMG = rgb2gray(frame);
+IMG = im2double(IMG);
+
+
+stop(vidObj); 
+wait(vidObj);
+
+out = imaqfind;
+for nn = 1:length(out)
+    stop(out(nn))
+    wait(out(nn));
+    delete(out(nn));
+end
+    
+
+
+testThresh = str2num(testThreshH.String);
+
+
+IMG(IMG<testThresh) = 0;
+
+imsz = size(IMG);
+
+axes(haxMAIN)
+ph1 = imagesc(IMG);
+set(gca,'YDir','reverse')
+haxMAIN.XLim = [1 size(IMG,2)];
+haxMAIN.YLim = [1 size(IMG,1)];
+
+
+axes(haxMINI)
+histogram(IMG(:))
+
+
+% pixelsAboveThresh = prctile(IMG(:),50);
+
+IM = IMG;
+
+IM(IM>=testThresh) = 1;
+
+temp1 = [];
+temp2 = IMG(IMG>testThresh);
+temp3 = sum(IM(:));
+temp4 = sprintf('There are % d pixels above threshold', temp3);
+temp5 = [];
+
+
+axes(haxMINIL)
+histogram(IMG(IMG>testThresh))
+
+    
+    memolog(temp4)
+    
+    
+end
 
 
 

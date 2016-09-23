@@ -37,11 +37,14 @@ vidObj.LoggingMode = 'memory';
 
 vidObj.ReturnedColorspace = imageType;
 
-vidObj.TriggerRepeat = 1;
+vidObj.TriggerRepeat = 2;
 vidObj.FramesPerTrigger = 1;
 triggerconfig(vidObj, 'manual');
 
 start(vidObj);
+
+trigger(vidObj);
+[frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
 
 trigger(vidObj);
 [frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
@@ -101,8 +104,8 @@ memos = memologs(memos, memoboxH, 'Mask is set.');
 
 %% PREALLOCATE DATA COLLECTORS
 
-imSizeX = 1280;
-imSizeY = 720;
+imSizeX = imsz(2);
+imSizeY = imsz(1);
 
 
 trial_data.tone_start = [];
@@ -197,7 +200,10 @@ for trial = 1:total_trials
         % GET THE COLUMN (X) AND ROW (Y) INDEX OF THE HOTTEST PIXELS
         % MEAN OF THOSE PIXEL COORDINATES IS GEOMETRIC CENTER
         xcol = mean( YXv(1:npixels,2) );
+        
         yrow = mean( imSizeY - YXv(1:npixels,1) );
+        % yrow = mean( YXv(1:npixels,1) );
+        
         xy(ff,:) = [xcol yrow];
         
         ff=ff+1;
