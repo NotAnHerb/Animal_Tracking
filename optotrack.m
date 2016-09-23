@@ -620,14 +620,16 @@ function camclear(boxidselecth, eventdata)
     
     memolog('Clearing image acquisition objects...')
     
-    out = imaqfind;
+    clear vidObj
+    
+    out = imaqfind; pause(.05);
     for nn = 1:length(out)
-        stop(out(nn))
-        wait(out(nn));
-        delete(out(nn));
+        stop(out(nn)); pause(.05);
+        wait(out(nn)); pause(.05);
+        delete(out(nn)); pause(.05);
     end
     
-    clear vidObj
+    
     
     memolog('Done.')
     
