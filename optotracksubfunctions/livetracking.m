@@ -163,6 +163,7 @@ start(vidObj);
 xy=[0 0];
 
 tic
+memos = memologs(memos, memoboxH, ['tic: ' num2str(toc)]);
 for trial = 1:total_trials
     
     fprintf('\n Starting trial: %d \n', trial);
@@ -236,7 +237,8 @@ for trial = 1:total_trials
         
         
         
-
+        memos = memologs(memos, memoboxH, ['toc: ' num2str(toc)]);
+        
         
         ff=ff+1;
     end
