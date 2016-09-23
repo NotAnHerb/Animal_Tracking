@@ -1,4 +1,4 @@
-function [] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
+function [memos] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
 % clc; close all; clear;
 
 %% USER-ENTERED PARAMETERS
@@ -277,6 +277,8 @@ end
 
 
 disp(tictoc')
+
+memos = memologs(memos, memoboxH, ['tic: ' num2str(tictoc(end))]);
 
 
 %% Save data

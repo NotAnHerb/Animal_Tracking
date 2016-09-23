@@ -604,7 +604,7 @@ function livetracktest(boxidselecth, eventdata)
     trackhead = trackheadH.Value;
      
 
-    livetracking(mainguih, haxMAIN, trials, framespertrial, pixelthresh,...
+    memos = livetracking(mainguih, haxMAIN, trials, framespertrial, pixelthresh,...
         npixels, headrad, trackhead, memos, memoboxH);
     
     memolog('Finished running livetracking test.')
