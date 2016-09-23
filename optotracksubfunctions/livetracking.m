@@ -96,7 +96,7 @@ hold on
 
 plot(STIM_region_x, STIM_region_y,'linewidth',10) %show ROI on plot
 
-pause(.5)
+pause(.001)
 
 memos = memologs(memos, memoboxH, 'Mask is set.');
 
@@ -173,7 +173,7 @@ for trial = 1:total_trials
     
     for nn = 1:framesPerTrial
         
-        pause(.5)
+        pause(.001)
         trigger(vidObj);
         [frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
         
@@ -211,7 +211,7 @@ for trial = 1:total_trials
             memos = memologs(memos, memoboxH, ['Any pixels in ROI?: ' num2str(anypixels)]);
             
             drawnow
-            pause(.02)
+            pause(.001)
                     
         else
             
@@ -322,7 +322,7 @@ if ~trackhead
         ph3.XData = xys(1:mm,1);
         ph3.YData = xys(1:mm,2);
 
-        pause(.2)
+        pause(.001)
 
         mm = nn*100-1;
     end
