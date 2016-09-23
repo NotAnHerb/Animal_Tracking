@@ -627,6 +627,7 @@ function camclear(boxidselecth, eventdata)
         delete(out(nn));
     end
     
+    clear vidObj
     
     memolog('Done.')
     
