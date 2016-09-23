@@ -1,13 +1,16 @@
 function [head_mask] = findsubject(image, threshmask, headrad, imsz)
 
 
-
-
+    im = image;
 
     %thresholds image
-    image(image<(prctile(reshape(image,[],1),threshmask))) = 0; 
-    image(image>=(prctile(reshape(image,[],1),threshmask))) = 1;
+    % image(image<(prctile(reshape(image,[],1),threshmask))) = 0; 
+    % image(image>=(prctile(reshape(image,[],1),threshmask))) = 1;
 
+    img = image;
+    img(img < threshmask) = 0;
+    img(img >= threshmask) = 1;
+    
     
     
     %find regions with contiguous pixels and makes 'objects'
@@ -105,7 +108,11 @@ function [head_mask] = findsubject(image, threshmask, headrad, imsz)
         
     end
 
+temp1 = [];
+temp2 = [];
+temp3 = [];
+temp4 = [];
+temp5 = [];
 
-
-
+% keyboard
 end
