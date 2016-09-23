@@ -12,10 +12,13 @@ threshmask = pxt;
 npixels = np;  % Number of 'hot' pixels to average to find center
 
 
-imageType = 'rgb';      % 'rgb' or 'grayscale'
 
 
 
+
+vidPos = [320 130 640 460];
+imageType = 'rgb';
+% imageType = 'grayscale';
 
 
 
@@ -28,14 +31,16 @@ imageType = 'rgb';      % 'rgb' or 'grayscale'
 %     delete(out(nn));
 % end
 
-
+% imaqtool
 vidObj = videoinput('macvideo', 1, 'YCbCr422_1280x720'); % CHANGE THIS TO THERMAL DEVICE ID
 % vidObj = videoinput('winvideo', 1, 'UYVY_720x480'); % default
 src = getselectedsource(vidObj);
 
-vidObj.LoggingMode = 'memory';
 
+vidObj.LoggingMode = 'memory';
 vidObj.ReturnedColorspace = imageType;
+vidObj.ROIPosition = vidPos;
+
 
 vidObj.TriggerRepeat = 2;
 vidObj.FramesPerTrigger = 1;
@@ -148,8 +153,11 @@ vidObj = videoinput('macvideo', 1, 'YCbCr422_1280x720'); % CHANGE THIS TO THERMA
 src = getselectedsource(vidObj);
 
 vidObj.LoggingMode = 'memory';
+vidObj.ReturnedColorspace = imageType;
+vidObj.ROIPosition = vidPos;
 
 vidObj.ReturnedColorspace = imageType;
+vidObj.ROIPosition = vidPos;
 
 vidObj.TriggerRepeat = total_trials * framesPerTrial + framesPerTrial;
 vidObj.FramesPerTrigger = 1;
@@ -162,29 +170,33 @@ start(vidObj);
 
 xy=[0 0];
 
+tictoc = (1:framesPerTrial) .* 0;
+
+% profile on
+
 tic
 memos = memologs(memos, memoboxH, ['tic: ' num2str(toc)]);
 for trial = 1:total_trials
     
-    fprintf('\n Starting trial: %d \n', trial);
+    % fprintf('\n Starting trial: %d \n', trial);
         
     % Get timing of trial start
-    trial_data.tone_start(trial,1) = toc;
+    % trial_data.tone_start(trial,1) = toc;
     
     for nn = 1:framesPerTrial
         
-        pause(.5)
+        % pause(.001)
         trigger(vidObj);
-        [frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
+        [frame, ~] = getdata(vidObj, vidObj.FramesPerTrigger);
         
-        FramesTS(end+1) = ts;
+        % FramesTS(end+1) = ts;
         
         
         IMG = rgb2gray(frame);
         IMG = im2double(IMG);
         
-        % Frames(:,:,:,ff) = IMG;
-        Frames(:,:,ff) = IMG;
+        
+        % Frames(:,:,ff) = IMG;
         
         
         % GET HEAD PIXELS OF SUBJECT
@@ -192,26 +204,28 @@ for trial = 1:total_trials
             
             headmask = findsubject(IMG, threshmask, headrad, imsz);
         
-            % anypixels = any(any(headmask .* STIM_region));
-            anypixels = sum(sum(headmask .* STIM_region));
+
             
-            ph1.CData = IMG .* STIM_region;
             
-            % ---- Delete this after we get everything working
-            [row,col,val] = find(headmask); 
-            RCV = [row,col,val];
-            [YXv, index] = sortrows(RCV,-3);
-            xcol = mean( YXv(:,2) );
-            yrow = mean( imSizeY - YXv(:,1) );
             
-            ph2.XData = xcol;
-            ph2.YData = yrow;
-            % ----
+%             % ---- Delete this after we get everything working
+%              anypixels = sum(sum(headmask .* STIM_region));
+%             ph1.CData = IMG .* STIM_region;
+%             
+%             [row,col,val] = find(headmask); 
+%             RCV = [row,col,val];
+%             [YXv, index] = sortrows(RCV,-3);
+%             xcol = mean( YXv(:,2) );
+%             yrow = mean( imSizeY - YXv(:,1) );
+%             
+%             ph2.XData = xcol;
+%             ph2.YData = yrow;
+%             memos = memologs(memos, memoboxH, ['Any pixels in ROI?: ' num2str(anypixels)]);
+%             drawnow
+%             pause(.001)
+%             % ----
             
-            memos = memologs(memos, memoboxH, ['Any pixels in ROI?: ' num2str(anypixels)]);
-            
-            drawnow
-            pause(.02)
+
                     
         else
             
@@ -237,19 +251,17 @@ for trial = 1:total_trials
         
         
         
-        memos = memologs(memos, memoboxH, ['toc: ' num2str(toc)]);
+        % memos = memologs(memos, memoboxH, ['toc: ' num2str(toc)]);
+        % disp(num2str(toc))
         
+        tictoc(nn) = toc;
         
         ff=ff+1;
     end
     
 
-    % send_to_daq('solenoid_1',.015);
-
-    % Get timing of trial end
-    trial_data.tone_end(trial,1) = toc;
-    
-    fprintf('\n Ending trial: %d \n', trial);
+    % send_to_daq('solenoid_1',.015);    
+    % fprintf('\n Ending trial: %d \n', trial);
     
 end
 
@@ -263,12 +275,16 @@ for nn = 1:length(out)
     delete(out(nn));
 end
 
+
+disp(tictoc')
+
+
 %% Save data
 
 % outfile=sprintf('FC_Day1_s%s_%s.mat', subject_id, date);
 % save([sub_dir, '/' outfile],'trial_data', 'Frames', 'FramesTS', 'FrameOrd');
 
-
+% profile viewer
 
 
 

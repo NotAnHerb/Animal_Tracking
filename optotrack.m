@@ -216,8 +216,8 @@ LTheadrad = uicontrol('Parent', LivePanelH, 'Style', 'Edit', 'Units', 'normalize
     'Position', [0.55 0.30 0.35 0.09], 'FontSize', 11);
 
 
-set(LTtrials, 'String', int2str(5));
-set(LTframespertrial, 'String', int2str(3));
+set(LTtrials, 'String', int2str(1));
+set(LTframespertrial, 'String', int2str(100));
 set(LTpixelthresh, 'String', num2str(0.25));
 set(LTnpixels, 'String', int2str(50));
 set(LTheadrad, 'String', int2str(60));
