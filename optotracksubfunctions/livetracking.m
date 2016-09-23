@@ -77,6 +77,15 @@ haxMAIN.XLim = [1 size(IMG,2)];
 haxMAIN.YLim = [1 size(IMG,1)];
 hold on
 
+axLims = axis;
+
+% axes(hax2)
+ph2 = scatter(1,1,100,'filled','MarkerFaceColor',[.9 .1 .1]);
+axis(axLims)
+hold on
+
+
+
 memos = memologs(memos, memoboxH, 'Click on image to create polygon area.');
 memos = memologs(memos, memoboxH, 'Right click and create mask to continue.');
 
@@ -185,11 +194,23 @@ for trial = 1:total_trials
             % anypixels = any(any(headmask .* STIM_region));
             anypixels = sum(sum(headmask .* STIM_region));
             
-            ph1.CData = IMG;
+            ph1.CData = IMG .* STIM_region;
+            
+            % ---- Delete this after we get everything working
+            [row,col,val] = find(headmask); 
+            RCV = [row,col,val];
+            [YXv, index] = sortrows(RCV,-3);
+            xcol = mean( YXv(:,2) );
+            yrow = mean( imSizeY - YXv(:,1) );
+            
+            ph2.XData = xcol;
+            ph2.YData = yrow;
+            % ----
             
             memos = memologs(memos, memoboxH, ['Any pixels in ROI?: ' num2str(anypixels)]);
             
             drawnow
+            pause(.02)
                     
         else
             
