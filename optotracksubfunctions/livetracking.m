@@ -11,134 +11,137 @@ threshmask = pxt;
 
 npixels = np;  % Number of 'hot' pixels to average to find center
 
-
-
-
-
-
-vidPos = [320 130 640 460];
-imageType = 'rgb';
-% imageType = 'grayscale';
-
-
+nmasks = 2;
 
 %% GET SINGLE CAMERA FRAME TO SET ROI MASKS
 
-% out = imaqfind;
-% for nn = 1:length(out)
-%     stop(out(nn))
-%     wait(out(nn));
-%     delete(out(nn));
-% end
-
-% imaqtool
-vidObj = videoinput('macvideo', 1, 'YCbCr422_1280x720'); % CHANGE THIS TO THERMAL DEVICE ID
-% vidObj = videoinput('winvideo', 1, 'UYVY_720x480'); % default
-src = getselectedsource(vidObj);
+[masks, IMG, memos] = setROIframe(nmasks, haxMAIN, memos, memoboxH);
 
 
-vidObj.LoggingMode = 'memory';
-vidObj.ReturnedColorspace = imageType;
-vidObj.ROIPosition = vidPos;
+
+%% MAKE PULSE PATTERNS
+
+% PP(1).Pnum   = 2;          % (int) number of different pulse patterns to generate
+% PP(1).ResHz  = 250;        % (ms)  pulse sampling rate
+% PP(1).Type   = 'square';   % (str) wave type: 'square' or 'sine'
+% PP(1).FreqHz = 10;         % (int) number of pulses per second
+% PP(1).Time   = 5;          % (sec) total length of time pulses are generated
+% PP(1).Volts  = 5;          % (dub) output voltage maximum pulse amplitude
+% PP(1).Phase  = 0;          % (rad) phase to start sine wave pulse
+% PP(1).PLen   = 0;          % (ms)  single square wave pulse on-duration (< 1/FreqHz)
+% PP(1).PDelay = 0;          % (ms)  delay between square wave pulse bursts (< FreqHz*PLen)
+% PP(1).xT = [];             % generated: X-axis timepoints
+% PP(1).yV = [];             % generated: Y-axis voltage amplitude values
+
+global PP
+
+PP(1).Pnum     = 2;
+PP(1).ResHz    = 250;
+PP(1).Type     = 'square';
+PP(1).FreqHz   = 10;
+PP(1).Time     = 5;
+PP(1).Volts    = 5;
+PP(1).Phase    = 0;
+PP(1).PLen     = 1 / PP(1).FreqHz / 2 * 1000;
+PP(1).PDelay   = 0;
+PP(1).xT       = [];
+PP(1).yV       = [];
+
+PP(2).Pnum     = 2;
+PP(2).ResHz    = 250;
+PP(2).Type     = 'sine';
+PP(2).FreqHz   = 10;
+PP(2).Time     = 5;
+PP(2).Volts    = 5;
+PP(2).Phase    = 0;
+PP(2).PLen     = 0;
+PP(2).PDelay   = 0;
+PP(2).xT       = [];
+PP(2).yV       = [];
 
 
-vidObj.TriggerRepeat = 2;
-vidObj.FramesPerTrigger = 1;
-triggerconfig(vidObj, 'manual');
-
-start(vidObj);
-
-trigger(vidObj);
-[frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
-
-trigger(vidObj);
-[frame, ts] = getdata(vidObj, vidObj.FramesPerTrigger);
-        
-
-IMG = rgb2gray(frame);
-IMG = im2double(IMG);
+[Pulses] = makePulses(PP);
 
 
-stop(vidObj); 
-wait(vidObj);
 
-out = imaqfind;
-for nn = 1:length(out)
-    stop(out(nn))
-    wait(out(nn));
-    delete(out(nn));
+
+%% ACQUIRE DAQ OBJECT AND TEST
+
+global lbj
+
+lbj=labJackU6;
+
+devInfo = getInfo(lbj);
+disp(lbj); disp(devInfo);
+pause(.2)
+
+open(lbj); pause(.2);
+
+lbj.SampleRateHz = Pulses(1).ResHz * 4;
+
+lbj.verbose = 0; % 0 or 1
+
+addChannel(lbj,[0 1],[10 10],['s' 's']);
+channel = 1; % 0 or 1
+
+streamConfigure(lbj); pause(.2);
+startStream(lbj);
+
+analogOut(lbj,channel,0)
+
+for t = 1 : Pulses(1).Time * Pulses(1).ResHz
+
+    analogOut(lbj,channel,Pulses(1).yV(t));
+
+    pause(1/Pulses(1).ResHz)
+
 end
 
 
+for t = 1 : Pulses(2).Time * Pulses(2).ResHz
 
-%% SET ROI MASK FROM SINGLE CAM IMAGE
+    analogOut(lbj,channel,Pulses(2).yV(t));
 
-imsz = size(IMG);
+    pause(1/Pulses(2).ResHz)
 
-axes(haxMAIN)
-ph1 = imagesc(IMG);
-set(gca,'YDir','reverse')
-haxMAIN.XLim = [1 size(IMG,2)];
-haxMAIN.YLim = [1 size(IMG,1)];
-hold on
+end
 
-axLims = axis;
-
-% axes(hax2)
-ph2 = scatter(1,1,100,'filled','MarkerFaceColor',[.9 .1 .1]);
-axis(axLims)
-hold on
+voltageSet = 0;
+analogOut(lbj,channel,voltageSet)
+% stopStream(lbj);
+% clear lbj
 
 
+%% 
 
-memos = memologs(memos, memoboxH, 'Click on image to create polygon area.');
-memos = memologs(memos, memoboxH, 'Right click and create mask to continue.');
+job = batch('evokeq');
 
+NumFncOutputs = 1;
+daqjob = batch('evokedaq',NumFncOutputs,{lbj,PP});
 
-[STIM_region, STIM_region_x, STIM_region_y] = roipoly; %allows user to plot polygonal ROI
-
-hold on
-
-plot(STIM_region_x, STIM_region_y,'linewidth',10) %show ROI on plot
-
-pause(.001)
-
-memos = memologs(memos, memoboxH, 'Mask is set.');
-
-
-axes(haxMAIN)
-ph1 = imagesc(STIM_region);
-set(gca,'YDir','reverse')
-haxMAIN.XLim = [1 size(IMG,2)];
-haxMAIN.YLim = [1 size(IMG,1)];
-hold on
-
-
-
-
-
-
-
-
-
+cancel(daqjob)
+cancel(job)
 
 %% PREALLOCATE DATA COLLECTORS
 
-imSizeX = imsz(2);
-imSizeY = imsz(1);
+FpS = 10;
+ExpLengthSeconds = 60;
+TotalFrames = ExpLengthSeconds*FpS;
 
-
-trial_data.tone_start = [];
-trial_data.tone_end = [];
+imSizeX = size(IMG,2);
+imSizeY = size(IMG,1);
 
 FramesTS = [];
 
-Frames = zeros(imSizeY,imSizeX,length(trial_data)*8);
-% Frames = zeros(imSizeY,imSizeX,3,length(trial_data)*8);
+Frames = zeros(imSizeY,imSizeX,TotalFrames);
 
 ff = 1;
 
 %% ACQUIRE IMAGE ACQUISITION DEVICE (THERMAL CAMERA) OBJECT
+
+vidPos = [320 130 640 460];
+imageType = 'rgb';
+% imageType = 'grayscale';
 
 out = imaqfind;
 for nn = 1:length(out)
@@ -248,6 +251,9 @@ for trial = 1:total_trials
             
         end
         
+        
+        
+        evokedaq(ROIn, lbj, channel, SampleRateHz, yv)
         
         
         
@@ -412,6 +418,13 @@ end
 end
 %% EOF
 
+
+
+function stopevoq(hObject, eventdata, handles)
+    
+    disp('Stopping Daq')
+
+end
 
 % SAVE IMAGE ACQUISITION NOTES
 %{
