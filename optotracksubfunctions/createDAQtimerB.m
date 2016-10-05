@@ -11,7 +11,7 @@ function tb = createDAQtimerB()
     voltMatrix   = repmat(P, 1, Time);
     voltMatrix(end) = 0;
 
-    nt = 2;
+    nt = 1;
 
     tb = timer;
     tb.UserData = {voltMatrix, nt};
