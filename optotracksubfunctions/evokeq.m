@@ -1,55 +1,59 @@
-function [daqstatus] = evokedaq()
-% function [daqstatus] = evokedaq(lbj,Pulse)
+function [daqstatus] = evokeq(x)
+
+
+for t=1:1000
+    
+    disp(x(t))
+    
+    pause(.5)
+
+end
+
+daqstatus = 'finished';
 
 
 
+
+
+
+%% function [] = evokeq(mTimer,~)
+% 
+%     FreqHz   = 10;
+%     Time     = 30;
+%     Volts    = 5;
+%     Hz       = 250;
+% 
+%     T        = linspace(0, 1, Hz);
+%     P        = (square(2*pi*FreqHz*T) + 1) .* (Volts/2);
+% 
+%     yV       = repmat(P, 1, Time);
+%     yV(end)  = 0;
+%     TimeHz   = Time*Hz;
+% 
+%     lbj      = labJackU6
+% 
+%     open(lbj);
+% 
+%     channel             = 1;
+%     lbj.SampleRateHz    = Hz * 4;
+%     lbj.verbose         = 0;
+% 
+%     addChannel(lbj,[0 1],[10 10],['s' 's']);
+% 
+% 
+% 
+%     streamConfigure(lbj);
+%     startStream(lbj);
+%     analogOut(lbj,channel,0)
+%     analogOut(lbj,channel,5)
+%     analogOut(lbj,channel,1)
+% 
 %     daqstatus = 'started';
 %     
-%     for t=1:Pulse.Time*Pulse.ResHz; analogOut(lbj,1,Pulse.yV(t)); pause(1/Pulse.ResHz); end
-%     
-%     analogOut(lbj,1,0);
+%     for t=1:TimeHz; analogOut(lbj,channel,yV(t)); pause(1/Hz); end
 % 
 %     daqstatus = 'finished';
-
-% keyboard
-
-%{.
-    FreqHz   = 10;
-    Time     = 30;
-    Volts    = 5;
-    Hz       = 250;
-
-    T        = linspace(0, 1, Hz);
-    P        = (square(2*pi*FreqHz*T) + 1) .* (Volts/2);
-
-    yV       = repmat(P, 1, Time);
-    yV(end)  = 0;
-    TimeHz   = Time*Hz;
-
-    lbj      = labJackU6
-
-    open(lbj);
-
-    channel             = 1;
-    lbj.SampleRateHz    = Hz * 4;
-    lbj.verbose         = 0;
-
-    addChannel(lbj,[0 1],[10 10],['s' 's']);
-
-
-
-    streamConfigure(lbj);
-    startStream(lbj);
-    analogOut(lbj,channel,0)
-    analogOut(lbj,channel,5)
-    analogOut(lbj,channel,1)
-
-    daqstatus = 'started';
     
-    for t=1:TimeHz; analogOut(lbj,channel,yV(t)); pause(1/Hz); end
-
-    daqstatus = 'finished';
-%}
     
 %%
     

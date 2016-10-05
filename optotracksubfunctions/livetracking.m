@@ -1,6 +1,38 @@
 function [memos] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
 % clc; close all; clear;
 
+
+
+
+
+
+%%
+
+ta = createDAQtimerA;
+tb = createDAQtimerB;
+
+
+
+
+
+for n = 1:100
+
+    start(ta);
+
+    if n >= 40 && n < 60
+        stop(ta);
+        start(tb);
+    end
+
+    if n >= 60
+        stop(tb);
+        start(ta);
+    end
+
+    pause(.1)
+end
+
+
 %% USER-ENTERED PARAMETERS
 
 total_trials = tri;
@@ -16,7 +48,6 @@ nmasks = 2;
 %% GET SINGLE CAMERA FRAME TO SET ROI MASKS
 
 [masks, IMG, memos] = setROIframe(nmasks, haxMAIN, memos, memoboxH);
-
 
 
 %% MAKE PULSE PATTERNS
@@ -71,9 +102,9 @@ global lbj
 
 lbj=labJackU6;
 
-devInfo = getInfo(lbj);
-disp(lbj); disp(devInfo);
-pause(.2)
+% devInfo = getInfo(lbj);
+% disp(lbj); disp(devInfo);
+% pause(.2)
 
 open(lbj); pause(.2);
 
@@ -111,14 +142,49 @@ analogOut(lbj,channel,voltageSet)
 % stopStream(lbj);
 % clear lbj
 
+% x = 1;
+% while t > 0
+% 
+%     
+%     analogOut(lbj,channel,Pulses(2).yV(x));
+% 
+%     pause(1/Pulses(2).ResHz)
+%     x = x+1;
+%     
+%     if x == numel(Pulses(2).yV)
+%         x = 1;
+%     end
+%     
+% end
+% 
+% 
+% analogOut(lbj,channel,0);
+
+
 
 %% 
 
-job = batch('evokeq');
+job = batch('evokedaq');
+
+s = 'Hi Reddit! Look I can still run this loop while the pulse loop is executing.';
+
+for t = 1:numel(s)
+    
+    fprintf('% s', s(t))
+    
+    pause(.1)
+
+end
+disp(' ')
+
+
+
 
 NumFncOutputs = 1;
-daqjob = batch('evokedaq',NumFncOutputs,{lbj,PP});
+daqjob = batch('evokedaq',NumFncOutputs,{lbj,Pulses(1)});
 
+delete(daqjob)
+clear('daqjob')
 cancel(daqjob)
 cancel(job)
 
