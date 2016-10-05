@@ -6,7 +6,7 @@ function [memos] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, t
 
 
 
-%%
+%% NAMEING THIS SECTION HEADER
 
 ta = createDAQtimerA;
 tb = createDAQtimerB;
