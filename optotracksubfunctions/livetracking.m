@@ -1,67 +1,5 @@
 function [memos] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
-% clc; close all; clear;
-
-keyboard
-
-%%
-
-global lbj
-lbj=labJackU6;
-open(lbj); pause(.2);
-lbj.SampleRateHz = 1000;
-lbj.verbose = 0;
-addChannel(lbj,[0 1],[10 10],['s' 's']);
-streamConfigure(lbj); pause(.2);
-startStream(lbj);
-
-analogOut(lbj,1,5); pause(1);
-analogOut(lbj,1,0); pause(1);
-
-
-%% CREATE TIMER OBJECTS FOR DAQ PULSE GENERATION
-
-% ta = createDAQtimerA;
-% tb = createDAQtimerB;
-
-ta = DAQtimerA(lbj);
-tb = DAQtimerB(lbj);
-
-% delete(ta)
-% delete(tb)
-pause(3)
-
-
-for n = 1:100
-
-    if n == 1
-        start(ta); pause(.01)
-        % drawnow
-    end
-
-    if n == 40
-        stop(ta); pause(.1)
-        analogOut(lbj,1,0);
-        start(tb); pause(.1)
-        % drawnow
-    end
-
-    if n == 60
-        stop(tb); pause(.1)
-        analogOut(lbj,1,0);
-        start(ta); pause(.1)
-        % drawnow
-    end
-
-    pause(.1)
-end
-stop(ta); pause(.1)
-analogOut(lbj,1,0);
-delete(ta)
-delete(tb)
-
-stopStream(lbj);
-% close(lbj);
-clear lbj
+% clc; close all; clear; clear java;
 
 
 %% USER-ENTERED PARAMETERS
@@ -75,6 +13,60 @@ threshmask = pxt;
 npixels = np;  % Number of 'hot' pixels to average to find center
 
 nmasks = 2;
+
+
+
+%% ACQUIRE DAQ OBJECT CLASS
+
+global lbj
+lbj=labJackU6; pause(.2);
+% devInfo = getInfo(lbj);
+open(lbj); pause(.2);
+lbj.SampleRateHz = 1000;
+lbj.verbose = 0;
+addChannel(lbj,[0 1],[10 10],['s' 's']);
+streamConfigure(lbj); pause(.2);
+startStream(lbj);
+
+analogOut(lbj,1,5); pause(1);
+analogOut(lbj,1,0); pause(1);
+
+
+%% CREATE TIMER OBJECTS FOR DAQ PULSE GENERATION
+
+ta = DAQtimerA(lbj);
+tb = DAQtimerB(lbj);
+
+pause(1)
+
+for n = 1:100
+
+    if n == 1
+        start(ta); pause(.01)
+    end
+
+    if n == 40
+        stop(ta); pause(.1)
+        analogOut(lbj,1,0);
+        start(tb); pause(.1)
+    end
+
+    if n == 60
+        stop(tb); pause(.1)
+        analogOut(lbj,1,0);
+        start(ta); pause(.1)
+    end
+
+    pause(.1)
+end
+stop(ta); pause(.1)
+analogOut(lbj,1,0);
+% delete(ta)
+% delete(tb)
+% stopStream(lbj);
+% clear lbj
+
+
 
 %% GET SINGLE CAMERA FRAME TO SET ROI MASKS
 
@@ -129,6 +121,25 @@ triggerconfig(vidObj, 'manual');
 start(vidObj);
 
 
+%%
+% keyboard
+
+%% CREATE FIGURE WINDOW FOR LIVE IMAGE
+fh1=figure('Units','normalized','OuterPosition',[.1 .1 .6 .8],'Color','w','MenuBar','none');
+hax1 = axes('Position',[.05 .05 .9 .9],'Color','none','NextPlot','replacechildren','YDir','reverse');
+hax1.XLim = [1, size(IMG,2)];
+hax1.YLim = [1, size(IMG,1)];
+hold on;
+hax2 = axes('Position',[.05 .05 .9 .9],'Color','none','NextPlot','replacechildren','YDir','reverse');
+hax2.XLim = [1, size(IMG,2)];
+hax2.YLim = [1, size(IMG,1)];
+hold on;
+
+axes(hax1);
+ph1 = imagesc(IMG);
+
+
+
 %% START IMAGE ACQUISITION LOOP
 
 xy=[0 0];
@@ -137,11 +148,19 @@ tictoc = (1:framesPerTrial) .* 0;
 
 % profile on
 
+daqA = 5;
+daqB = 0;
+
 tic
 memos = memologs(memos, memoboxH, ['tic: ' num2str(toc)]);
 for trial = 1:total_trials
     
-    % fprintf('\n Starting trial: %d \n', trial);
+    fprintf('\n Starting trial: %d \n', trial);
+    
+    if daqA == 5
+        start(ta); 
+        daqA = 2;
+    end
         
     % Get timing of trial start
     % trial_data.tone_start(trial,1) = toc;
@@ -168,27 +187,6 @@ for trial = 1:total_trials
         if trackhead
             
             headmask = findsubject(IMG, threshmask, headrad, imsz);
-        
-
-            
-            
-            
-%             % ---- Delete this after we get everything working
-%              anypixels = sum(sum(headmask .* STIM_region));
-%             ph1.CData = IMG .* STIM_region;
-%             
-%             [row,col,val] = find(headmask); 
-%             RCV = [row,col,val];
-%             [YXv, index] = sortrows(RCV,-3);
-%             xcol = mean( YXv(:,2) );
-%             yrow = mean( imSizeY - YXv(:,1) );
-%             
-%             ph2.XData = xcol;
-%             ph2.YData = yrow;
-%             memos = memologs(memos, memoboxH, ['Any pixels in ROI?: ' num2str(anypixels)]);
-%             drawnow
-%             pause(.001)
-%             % ----
                                 
         else
             
@@ -209,12 +207,33 @@ for trial = 1:total_trials
 
             xy(ff,:) = [xcol yrow];
             
+            ph1.CData = IMG;
+            
+            if nn == round(framesPerTrial/2)
+                daqB = 1;
+            end
+
+            if daqA == 1
+                if daqB == 2;
+                    stop(tb);
+                    daqB = 0;
+                end
+                analogOut(lbj,1,0);
+                start(ta);
+                daqA = 2;
+            end
+            
+            if daqB == 1
+                if daqA == 2;
+                    stop(ta);
+                    daqA = 0;
+                end
+                analogOut(lbj,1,0);
+                start(tb); 
+                daqB = 2;
+            end
+            
         end
-        
-        
-        
-        evokedaq(ROIn, lbj, channel, SampleRateHz, yv)
-        
         
         
         % memos = memologs(memos, memoboxH, ['toc: ' num2str(toc)]);
@@ -223,11 +242,13 @@ for trial = 1:total_trials
         tictoc(nn) = toc;
         
         ff=ff+1;
+        
+        pause(.01)
     end
     
 
-    % send_to_daq('solenoid_1',.015);    
-    % fprintf('\n Ending trial: %d \n', trial);
+    
+    fprintf('\n Ending trial: %d \n', trial);
     
 end
 
@@ -242,9 +263,22 @@ for nn = 1:length(out)
 end
 
 
+stop(ta); pause(.01)
+stop(tb); pause(.01)
+delete(ta); pause(.01)
+delete(tb); pause(.01)
+
+analogOut(lbj,1,0);
+stopStream(lbj);
+clear lbj
+
+% lbj = labJackU6;
+% reset(lbj,'hard')
+
+
 disp(tictoc')
 
-memos = memologs(memos, memoboxH, ['tic: ' num2str(tictoc(end))]);
+% memos = memologs(memos, memoboxH, ['tic: ' num2str(tictoc(end))]);
 
 
 %% Save data
@@ -260,6 +294,37 @@ memos = memologs(memos, memoboxH, ['tic: ' num2str(tictoc(end))]);
 
 
 %% OPTIONAL: Play VIDEO overlaying tracking position over rat to check accuracy
+%{
+
+% LIVE PLOTTING FOR LOOP
+
+            
+            
+            
+%             % ---- Delete this after we get everything working
+%              anypixels = sum(sum(headmask .* STIM_region));
+%             ph1.CData = IMG .* STIM_region;
+%             
+%             [row,col,val] = find(headmask); 
+%             RCV = [row,col,val];
+%             [YXv, index] = sortrows(RCV,-3);
+%             xcol = mean( YXv(:,2) );
+%             yrow = mean( imSizeY - YXv(:,1) );
+%             
+%             ph2.XData = xcol;
+%             ph2.YData = yrow;
+%             memos = memologs(memos, memoboxH, ['Any pixels in ROI?: ' num2str(anypixels)]);
+%             drawnow
+%             pause(.001)
+%             % ----
+
+
+
+
+
+
+
+
 
 if ~trackhead
 
@@ -318,7 +383,7 @@ if ~trackhead
     axis(axLims)
 
 end
-
+%}
 
 % fh1=figure('Units','normalized','OuterPosition',[.1 .1 .6 .7],'Color','w','MenuBar','none');
 % 

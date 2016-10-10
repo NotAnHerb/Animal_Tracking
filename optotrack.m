@@ -226,7 +226,7 @@ set(LTnpixels, 'String', int2str(50));
 set(LTheadrad, 'String', int2str(60));
 
 trackheadH = uicontrol('Parent', LivePanelH,'Style','checkbox','Units','normalized',...
-    'Position', [0.05 0.05 0.90 0.10] ,'String','Track Head', 'Value',1);
+    'Position', [0.05 0.05 0.90 0.10] ,'String','Track Head', 'Value',0);
 
 
 
