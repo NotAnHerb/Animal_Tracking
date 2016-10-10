@@ -10,7 +10,7 @@ function tb = createDAQtimerB()
 
     voltMatrix   = repmat(P, 1, Time);
     voltMatrix(end) = 0;
-
+    
     nt = 1;
 
     tb = timer;
@@ -44,5 +44,5 @@ end
 
 function DAQTimerCleanup(mTimer,~)
     disp('Stopping DAQ timer B.')
-    delete(mTimer)
+    % delete(mTimer)
 end

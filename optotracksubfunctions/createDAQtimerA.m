@@ -6,10 +6,11 @@ function ta = createDAQtimerA()
     FreqHz    = 10;
     Volts     = 5;
     T         = linspace(0, 1, Hz);
-    P        = (square(2*pi*FreqHz*T) + 1) .* (Volts/2);
+    P        = (sin(2*pi*FreqHz*T) +1) .* (Volts/2);
 
     voltMatrix   = repmat(P, 1, Time);
     voltMatrix(end) = 0;
+
 
     nt = 1;
 
@@ -44,5 +45,5 @@ end
 
 function DAQTimerCleanup(mTimer,~)
     disp('Stopping DAQ timer A.')
-    delete(mTimer)
+    % delete(mTimer)
 end

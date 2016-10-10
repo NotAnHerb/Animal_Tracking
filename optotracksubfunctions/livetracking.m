@@ -1,36 +1,67 @@
 function [memos] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
 % clc; close all; clear;
 
+keyboard
+
+%%
+
+global lbj
+lbj=labJackU6;
+open(lbj); pause(.2);
+lbj.SampleRateHz = 1000;
+lbj.verbose = 0;
+addChannel(lbj,[0 1],[10 10],['s' 's']);
+streamConfigure(lbj); pause(.2);
+startStream(lbj);
+
+analogOut(lbj,1,5); pause(1);
+analogOut(lbj,1,0); pause(1);
 
 
+%% CREATE TIMER OBJECTS FOR DAQ PULSE GENERATION
 
+% ta = createDAQtimerA;
+% tb = createDAQtimerB;
 
+ta = DAQtimerA(lbj);
+tb = DAQtimerB(lbj);
 
-%% NAMEING THIS SECTION HEADER
-
-ta = createDAQtimerA;
-tb = createDAQtimerB;
-
-
-
+% delete(ta)
+% delete(tb)
+pause(3)
 
 
 for n = 1:100
 
-    start(ta);
-
-    if n >= 40 && n < 60
-        stop(ta);
-        start(tb);
+    if n == 1
+        start(ta); pause(.01)
+        % drawnow
     end
 
-    if n >= 60
-        stop(tb);
-        start(ta);
+    if n == 40
+        stop(ta); pause(.1)
+        analogOut(lbj,1,0);
+        start(tb); pause(.1)
+        % drawnow
+    end
+
+    if n == 60
+        stop(tb); pause(.1)
+        analogOut(lbj,1,0);
+        start(ta); pause(.1)
+        % drawnow
     end
 
     pause(.1)
 end
+stop(ta); pause(.1)
+analogOut(lbj,1,0);
+delete(ta)
+delete(tb)
+
+stopStream(lbj);
+% close(lbj);
+clear lbj
 
 
 %% USER-ENTERED PARAMETERS
@@ -50,143 +81,6 @@ nmasks = 2;
 [masks, IMG, memos] = setROIframe(nmasks, haxMAIN, memos, memoboxH);
 
 
-%% MAKE PULSE PATTERNS
-
-% PP(1).Pnum   = 2;          % (int) number of different pulse patterns to generate
-% PP(1).ResHz  = 250;        % (ms)  pulse sampling rate
-% PP(1).Type   = 'square';   % (str) wave type: 'square' or 'sine'
-% PP(1).FreqHz = 10;         % (int) number of pulses per second
-% PP(1).Time   = 5;          % (sec) total length of time pulses are generated
-% PP(1).Volts  = 5;          % (dub) output voltage maximum pulse amplitude
-% PP(1).Phase  = 0;          % (rad) phase to start sine wave pulse
-% PP(1).PLen   = 0;          % (ms)  single square wave pulse on-duration (< 1/FreqHz)
-% PP(1).PDelay = 0;          % (ms)  delay between square wave pulse bursts (< FreqHz*PLen)
-% PP(1).xT = [];             % generated: X-axis timepoints
-% PP(1).yV = [];             % generated: Y-axis voltage amplitude values
-
-global PP
-
-PP(1).Pnum     = 2;
-PP(1).ResHz    = 250;
-PP(1).Type     = 'square';
-PP(1).FreqHz   = 10;
-PP(1).Time     = 5;
-PP(1).Volts    = 5;
-PP(1).Phase    = 0;
-PP(1).PLen     = 1 / PP(1).FreqHz / 2 * 1000;
-PP(1).PDelay   = 0;
-PP(1).xT       = [];
-PP(1).yV       = [];
-
-PP(2).Pnum     = 2;
-PP(2).ResHz    = 250;
-PP(2).Type     = 'sine';
-PP(2).FreqHz   = 10;
-PP(2).Time     = 5;
-PP(2).Volts    = 5;
-PP(2).Phase    = 0;
-PP(2).PLen     = 0;
-PP(2).PDelay   = 0;
-PP(2).xT       = [];
-PP(2).yV       = [];
-
-
-[Pulses] = makePulses(PP);
-
-
-
-
-%% ACQUIRE DAQ OBJECT AND TEST
-
-global lbj
-
-lbj=labJackU6;
-
-% devInfo = getInfo(lbj);
-% disp(lbj); disp(devInfo);
-% pause(.2)
-
-open(lbj); pause(.2);
-
-lbj.SampleRateHz = Pulses(1).ResHz * 4;
-
-lbj.verbose = 0; % 0 or 1
-
-addChannel(lbj,[0 1],[10 10],['s' 's']);
-channel = 1; % 0 or 1
-
-streamConfigure(lbj); pause(.2);
-startStream(lbj);
-
-analogOut(lbj,channel,0)
-
-for t = 1 : Pulses(1).Time * Pulses(1).ResHz
-
-    analogOut(lbj,channel,Pulses(1).yV(t));
-
-    pause(1/Pulses(1).ResHz)
-
-end
-
-
-for t = 1 : Pulses(2).Time * Pulses(2).ResHz
-
-    analogOut(lbj,channel,Pulses(2).yV(t));
-
-    pause(1/Pulses(2).ResHz)
-
-end
-
-voltageSet = 0;
-analogOut(lbj,channel,voltageSet)
-% stopStream(lbj);
-% clear lbj
-
-% x = 1;
-% while t > 0
-% 
-%     
-%     analogOut(lbj,channel,Pulses(2).yV(x));
-% 
-%     pause(1/Pulses(2).ResHz)
-%     x = x+1;
-%     
-%     if x == numel(Pulses(2).yV)
-%         x = 1;
-%     end
-%     
-% end
-% 
-% 
-% analogOut(lbj,channel,0);
-
-
-
-%% 
-
-job = batch('evokedaq');
-
-s = 'Hi Reddit! Look I can still run this loop while the pulse loop is executing.';
-
-for t = 1:numel(s)
-    
-    fprintf('% s', s(t))
-    
-    pause(.1)
-
-end
-disp(' ')
-
-
-
-
-NumFncOutputs = 1;
-daqjob = batch('evokedaq',NumFncOutputs,{lbj,Pulses(1)});
-
-delete(daqjob)
-clear('daqjob')
-cancel(daqjob)
-cancel(job)
 
 %% PREALLOCATE DATA COLLECTORS
 
@@ -492,6 +386,296 @@ function stopevoq(hObject, eventdata, handles)
 
 end
 
+
+
+
+
+
+
+
+
+
+% ---------------------------------------------------------------------
+%                   DAQ TIMER A FUNCTIONS
+% ---------------------------------------------------------------------
+function ta = DAQtimerA(lbj)
+
+    Time      = 30;
+    Hz        = 250;
+    TimeHz    = Time*Hz;
+    FreqHz    = 10;
+    Volts     = 5;
+    T         = linspace(0, 1, Hz);
+    P        = (sin(2*pi*FreqHz*T) +1) .* (Volts/2);
+
+    voltMatrix   = repmat(P, 1, Time);
+    voltMatrix(end) = 0;
+
+    
+
+    nt = 1;
+
+    ta = timer;
+    ta.UserData = {voltMatrix, nt, lbj};
+    ta.StartFcn = @DAQTimerStartA;
+    ta.TimerFcn = @genDAQoutputA;
+    ta.StopFcn = @DAQTimerCleanupA;
+    ta.Period = 1/Hz;
+    ta.StartDelay = 0;
+    ta.TasksToExecute = TimeHz;
+    ta.ExecutionMode = 'fixedSpacing';
+
+end 
+
+
+function DAQTimerStartA(mTimerA,~)
+    disp('Starting DAQ timer A.');
+end
+
+
+function genDAQoutputA(mTimerA,~)
+
+    uData = mTimerA.UserData;
+    vMx = uData{1};
+    nt = uData{2};
+    % disp( vMx(1,nt) )
+    analogOut(uData{3},1,vMx(1,nt))
+    nt = nt+1;
+    mTimerA.UserData = {vMx, nt, uData{3}};
+
+end
+
+function DAQTimerCleanupA(mTimerA,~)
+    disp('Stopping DAQ timer A.')
+    % delete(mTimer)
+end
+
+
+% ---------------------------------------------------------------------
+%                   DAQ TIMER B FUNCTIONS
+% ---------------------------------------------------------------------
+
+function tb = DAQtimerB(lbj)
+
+    Time      = 30;
+    Hz        = 250;
+    TimeHz    = Time*Hz;
+    FreqHz    = 10;
+    Volts     = 5;
+    T         = linspace(0, 1, Hz);
+    P        = (square(2*pi*FreqHz*T) + 1) .* (Volts/2);
+
+    voltMatrix   = repmat(P, 1, Time);
+    voltMatrix(end) = 0;
+    
+    nt = 1;
+
+    tb = timer;
+    tb.UserData = {voltMatrix, nt, lbj};
+    tb.StartFcn = @DAQTimerStartB;
+    tb.TimerFcn = @genDAQoutputB;
+    tb.StopFcn = @DAQTimerCleanupB;
+    tb.Period = 1/Hz;
+    tb.StartDelay = 0;
+    tb.TasksToExecute = TimeHz;
+    tb.ExecutionMode = 'fixedSpacing';
+
+end 
+
+
+function DAQTimerStartB(mTimerB,~)
+    disp('Starting DAQ timer B.');
+end
+
+
+function genDAQoutputB(mTimerB,~)
+
+    uData = mTimerB.UserData;
+    vMx = uData{1};
+    nt = uData{2};
+    % disp( vMx(1,nt) )
+    analogOut(uData{3},1,vMx(1,nt))
+    nt = nt+1;
+    mTimerB.UserData = {vMx, nt, uData{3}};
+
+end
+
+function DAQTimerCleanupB(mTimerB,~)
+    disp('Stopping DAQ timer B.')
+    % delete(mTimer)
+end
+
+
+
+% ---------------------------------------------------------------------
+%                   DAQ TIMER B FUNCTIONS
+% ---------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% DAQ & PARALLEL NOTES
+%{
+%% MAKE PULSE PATTERNS
+
+% PP(1).Pnum   = 2;          % (int) number of different pulse patterns to generate
+% PP(1).ResHz  = 250;        % (ms)  pulse sampling rate
+% PP(1).Type   = 'square';   % (str) wave type: 'square' or 'sine'
+% PP(1).FreqHz = 10;         % (int) number of pulses per second
+% PP(1).Time   = 5;          % (sec) total length of time pulses are generated
+% PP(1).Volts  = 5;          % (dub) output voltage maximum pulse amplitude
+% PP(1).Phase  = 0;          % (rad) phase to start sine wave pulse
+% PP(1).PLen   = 0;          % (ms)  single square wave pulse on-duration (< 1/FreqHz)
+% PP(1).PDelay = 0;          % (ms)  delay between square wave pulse bursts (< FreqHz*PLen)
+% PP(1).xT = [];             % generated: X-axis timepoints
+% PP(1).yV = [];             % generated: Y-axis voltage amplitude values
+
+global PP
+
+PP(1).Pnum     = 2;
+PP(1).ResHz    = 250;
+PP(1).Type     = 'square';
+PP(1).FreqHz   = 10;
+PP(1).Time     = 5;
+PP(1).Volts    = 5;
+PP(1).Phase    = 0;
+PP(1).PLen     = 1 / PP(1).FreqHz / 2 * 1000;
+PP(1).PDelay   = 0;
+PP(1).xT       = [];
+PP(1).yV       = [];
+
+PP(2).Pnum     = 2;
+PP(2).ResHz    = 250;
+PP(2).Type     = 'sine';
+PP(2).FreqHz   = 10;
+PP(2).Time     = 5;
+PP(2).Volts    = 5;
+PP(2).Phase    = 0;
+PP(2).PLen     = 0;
+PP(2).PDelay   = 0;
+PP(2).xT       = [];
+PP(2).yV       = [];
+
+
+[Pulses] = makePulses(PP);
+
+
+
+
+%% ACQUIRE DAQ OBJECT AND TEST
+
+
+
+% devInfo = getInfo(lbj);
+% disp(lbj); disp(devInfo);
+% pause(.2)
+
+open(lbj); pause(.2);
+
+lbj.SampleRateHz = Pulses(1).ResHz * 4;
+
+lbj.verbose = 0; % 0 or 1
+
+addChannel(lbj,[0 1],[10 10],['s' 's']);
+channel = 1; % 0 or 1
+
+streamConfigure(lbj); pause(.2);
+startStream(lbj);
+
+analogOut(lbj,channel,0)
+
+for t = 1 : Pulses(1).Time * Pulses(1).ResHz
+
+    analogOut(lbj,channel,Pulses(1).yV(t));
+
+    pause(1/Pulses(1).ResHz)
+
+end
+
+
+for t = 1 : Pulses(2).Time * Pulses(2).ResHz
+
+    analogOut(lbj,channel,Pulses(2).yV(t));
+
+    pause(1/Pulses(2).ResHz)
+
+end
+
+voltageSet = 0;
+analogOut(lbj,channel,voltageSet)
+% stopStream(lbj);
+% clear lbj
+
+% x = 1;
+% while t > 0
+% 
+%     
+%     analogOut(lbj,channel,Pulses(2).yV(x));
+% 
+%     pause(1/Pulses(2).ResHz)
+%     x = x+1;
+%     
+%     if x == numel(Pulses(2).yV)
+%         x = 1;
+%     end
+%     
+% end
+% 
+% 
+% analogOut(lbj,channel,0);
+
+
+
+%% 
+
+job = batch('evokedaq');
+
+s = 'Hi Reddit! Look I can still run this loop while the pulse loop is executing.';
+
+for t = 1:numel(s)
+    
+    fprintf('% s', s(t))
+    
+    pause(.1)
+
+end
+disp(' ')
+
+
+
+
+NumFncOutputs = 1;
+daqjob = batch('evokedaq',NumFncOutputs,{lbj,Pulses(1)});
+
+delete(daqjob)
+clear('daqjob')
+cancel(daqjob)
+cancel(job)
+
+%}
+
+
 % SAVE IMAGE ACQUISITION NOTES
 %{
 
@@ -596,4 +780,3 @@ startTime = GetSecs;
 ff=1;
 
 %}
-
