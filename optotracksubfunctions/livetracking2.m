@@ -1,4 +1,4 @@
-function [memos] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
+function [memos] = livetracking2(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
 % clc; close all; clear; clear java;
 
 
@@ -93,46 +93,42 @@ ff = 1;
 % total_trials = 1;
 % framesPerTrial = 100;
 
-% vidPos = [320 130 640 460];
-% imageType = 'rgb';
-% % imageType = 'grayscale';
-% 
-% out = imaqfind;
-% for nn = 1:length(out)
-%     stop(out(nn))
-%     wait(out(nn));
-%     delete(out(nn));
-% end
-% 
-% % imaqtool
-% vidObj = videoinput('macvideo', 1, 'YCbCr422_1280x720'); % CHANGE THIS TO THERMAL DEVICE ID
-% % vidObj = videoinput('winvideo', 1, 'UYVY_720x480'); % default
-% src = getselectedsource(vidObj);
-% 
-% vidObj.LoggingMode = 'memory';
-% vidObj.ReturnedColorspace = imageType;
-% vidObj.ROIPosition = vidPos;
-% 
-% vidObj.ReturnedColorspace = imageType;
-% vidObj.ROIPosition = vidPos;
-% 
-% vidObj.TriggerRepeat = total_trials * framesPerTrial + framesPerTrial;
-% vidObj.FramesPerTrigger = 1;
-% triggerconfig(vidObj, 'manual');
-% 
-% start(vidObj);
+vidPos = [320 130 640 460];
+imageType = 'rgb';
+% imageType = 'grayscale';
+
+out = imaqfind;
+for nn = 1:length(out)
+    stop(out(nn))
+    wait(out(nn));
+    delete(out(nn));
+end
+
+% imaqtool
+vidObj = videoinput('macvideo', 1, 'YCbCr422_1280x720'); % CHANGE THIS TO THERMAL DEVICE ID
+% vidObj = videoinput('winvideo', 1, 'UYVY_720x480'); % default
+src = getselectedsource(vidObj);
+
+vidObj.LoggingMode = 'memory';
+vidObj.ReturnedColorspace = imageType;
+vidObj.ROIPosition = vidPos;
+
+vidObj.ReturnedColorspace = imageType;
+vidObj.ROIPosition = vidPos;
+
+vidObj.TriggerRepeat = total_trials * framesPerTrial + framesPerTrial;
+vidObj.FramesPerTrigger = 1;
+triggerconfig(vidObj, 'manual');
+
+start(vidObj);
 
 
-cam = webcam();
-videoFrame = snapshot(cam);
-frameSize = size(videoFrame);
-videoPlayer = vision.VideoPlayer('Position', [100 100 [frameSize(2), frameSize(1)]+30]);
+% cam = webcam();
+% videoFrame = snapshot(cam);
+% videoPlayer = vision.VideoPlayer('Position', [100 100 [frameSize(2), frameSize(1)]+30]);
 
-videoFrame = snapshot(cam);
-videoFrameGray = rgb2gray(videoFrame);
-
-
-
+%%
+% keyboard
 
 %% CREATE FIGURE WINDOW FOR LIVE IMAGE
 fh1=figure('Units','normalized','OuterPosition',[.1 .1 .6 .8],'Color','w','MenuBar','none');
