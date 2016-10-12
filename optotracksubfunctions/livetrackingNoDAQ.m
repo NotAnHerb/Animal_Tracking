@@ -1,41 +1,94 @@
-function [memos] = livetracking(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
-% clc; close all; clear; clear java;
+function [] = livetrackingNoDAQ()
+% function [memos] = livetrackingNoDAQ(mainguih, haxMAIN, tri, fpt, pxt, np, headrad, trackhead, memos, memoboxH)
+clc; close all; clear; clear java;
 
 
 %% USER-ENTERED PARAMETERS
 
-total_trials = tri;
+framesPerTrial = 2000;
 
-framesPerTrial = fpt;
-
-threshmask = pxt;
-
-npixels = np;  % Number of 'hot' pixels to average to find center
+npixels = 10;  % Number of 'hot' pixels to average to find center
 
 nmasks = 2;
 
 
+%% GET SINGLE CAMERA FRAME TO SET ROI MASKS
+
+[masks, IMG] = getROIframes(nmasks);
+
+close all;
+
 
 %% ACQUIRE DAQ OBJECT CLASS
 
-global lbj
-lbj=labJackU6; pause(.2);
-% devInfo = getInfo(lbj);
-open(lbj); pause(.2);
-lbj.SampleRateHz = 1000;
-lbj.verbose = 0;
-addChannel(lbj,[0 1],[10 10],['s' 's']);
-streamConfigure(lbj); pause(.2);
-startStream(lbj);
+cam = webcam();
+frame = snapshot(cam);
+frameSize = size(frame);
+clear cam
 
-analogOut(lbj,1,5); pause(1);
-analogOut(lbj,1,0); pause(1);
 
+Time      = 30;
+Hz        = 250;
+FreqHz    = 10;
+Volts     = 5;
+T         = linspace(0, 1, Hz);
+PA        = (sin(2*pi*FreqHz*T) +1) .* (Volts/2);
+PB        = (square(2*pi*FreqHz*T) + 1) .* (Volts/2);
+
+voltMatrixA = repmat(PA, 1, Time)';
+voltMatrixA(end) = 0;
+
+voltMatrixB = repmat(PB, 1, Time)';
+voltMatrixB(end) = 0;
+
+
+fhDAQ = figure('Units','normalized','OuterPosition',[.01 .05 .95 .5],'Color','w','MenuBar','none');
+haxCAM  = axes('Position',[.01 .01 .45 .9],'Color','none','NextPlot','replacechildren','YDir','reverse');
+haxCAM.XLim = [1, size(frame,2)];
+haxCAM.YLim = [1, size(frame,1)];
+hold on;
+haxPIN  = axes('Position',[.01 .01 .45 .9],'Color','none','NextPlot','replacechildren','YDir','reverse');
+haxPIN.XLim = [1, size(frame,2)];
+haxPIN.YLim = [1, size(frame,1)];
+hold on;
+
+
+haxDAQ  = axes('Position',[.51 .01 .45 .9],'Color','none','NextPlot','replacechildren');
+haxDAQ.XLim = [1, length(PA)];
+haxDAQ.YLim = [0, max(PA)];
+hold on;
+
+
+axes(haxCAM);
+phCAM = imagesc(frame);
+axes(haxPIN);
+phPIN = scatter(10,10,60,'r','filled');
+
+
+axes(haxDAQ);
+phWavA = plot([PA', PB']);
+% phWavB = plot(voltMatrixB);
+phDAQ = scatter(1,voltMatrixA(1),60,'k','filled');
+% phDotB = scatter(10,10,60,'r','filled');
+
+% nvMx = length(voltMatrixA);
+% nvPA = length(PA);
+% mm = 1;
+% for nn = 1:nvMx
+%     
+%     phDAQ.XData = mm;
+%     phDAQ.YData = PB(mm);
+%     
+%     mm = mm + 1;
+%     if mm == nvPA; mm = 1; end;
+% 
+%     pause(.01)
+% end
 
 %% CREATE TIMER OBJECTS FOR DAQ PULSE GENERATION
 
-ta = DAQtimerA(lbj);
-tb = DAQtimerB(lbj);
+ta = TESTtimerA(phDAQ);
+tb = TESTtimerB(phDAQ);
 
 pause(1)
 
@@ -47,30 +100,20 @@ for n = 1:100
 
     if n == 40
         stop(ta); pause(.1)
-        analogOut(lbj,1,0);
         start(tb); pause(.1)
     end
 
     if n == 60
         stop(tb); pause(.1)
-        analogOut(lbj,1,0);
         start(ta); pause(.1)
     end
 
     pause(.1)
 end
 stop(ta); pause(.1)
-analogOut(lbj,1,0);
+
 % delete(ta)
 % delete(tb)
-% stopStream(lbj);
-% clear lbj
-
-
-
-%% GET SINGLE CAMERA FRAME TO SET ROI MASKS
-
-[masks, IMG, memos] = setROIframe(nmasks, haxMAIN, memos, memoboxH);
 
 
 %% ACQUIRE IMAGE ACQUISITION DEVICE (CAMERA) OBJECT
@@ -80,7 +123,7 @@ frame = snapshot(cam);
 frameSize = size(frame);
 frameGray = rgb2gray(frame);
 
-videoPlayer = vision.VideoPlayer('Position', [100 100 [frameSize(2), frameSize(1)]+30]);
+% videoPlayer = vision.VideoPlayer('Position', [100 100 [frameSize(2), frameSize(1)]+30]);
 
 
 %% PREALLOCATE DATA COLLECTORS
@@ -95,29 +138,35 @@ Frames = zeros(imSizeY,imSizeX,framesPerTrial);
 
 
 %% CREATE FIGURE WINDOW FOR LIVE IMAGE
-fh1=figure('Units','normalized','OuterPosition',[.1 .1 .6 .8],'Color','w','MenuBar','none');
-hax1 = axes('Position',[.05 .05 .9 .9],'Color','none','NextPlot','replacechildren','YDir','reverse');
-hax1.XLim = [1, size(frame,2)];
-hax1.YLim = [1, size(frame,1)];
-hold on;
-hax2 = axes('Position',[.05 .05 .9 .9],'Color','none','NextPlot','replacechildren','YDir','reverse');
-hax2.XLim = [1, size(frame,2)];
-hax2.YLim = [1, size(frame,1)];
-hold on;
+% fh1=figure('Units','normalized','OuterPosition',[.1 .1 .6 .8],'Color','w','MenuBar','none');
+% hax1 = axes('Position',[.05 .05 .9 .9],'Color','none','NextPlot','replacechildren','YDir','reverse');
+% hax1.XLim = [1, size(frame,2)];
+% hax1.YLim = [1, size(frame,1)];
+% hold on;
+% hax2 = axes('Position',[.05 .05 .9 .9],'Color','none','NextPlot','replacechildren','YDir','reverse');
+% hax2.XLim = [1, size(frame,2)];
+% hax2.YLim = [1, size(frame,1)];
+% hold on;
+% 
+% axes(hax1);
+% ph1 = imagesc(frame);
+% 
+% axes(hax2);
+% ph2 = scatter(10,10,60,'r','filled');
 
-axes(hax1);
-ph1 = imagesc(frame);
-
-axes(hax2);
-ph2 = scatter(10,10,60,'r','filled');
-
+axes(haxCAM);
+phCAM = imagesc(frame);
+axes(haxPIN);
+phPIN = scatter(10,10,60,'r','filled');
 
 
 %% SET PRE-LOOP PARAMETERS
 
-xy=[0 0];
+framesPerTrial = 2000;
 
-tictoc = (1:framesPerTrial) .* 0;
+xy = zeros(framesPerTrial,2);
+
+tictoc = zeros(framesPerTrial,1);
 
 runLoop = true;
 frameCount = 0;
@@ -125,11 +174,9 @@ frameCount = 0;
 daqA = 0;
 daqB = 0;
 
-ff = 1;
-
 tic
-memos = memologs(memos, memoboxH, ['tic: ' num2str(toc)]);
 
+ff = 1;
 %% MAIN LOOP
 while runLoop && frameCount < framesPerTrial
     
@@ -159,45 +206,44 @@ while runLoop && frameCount < framesPerTrial
 
     % GET THE COLUMN (X) AND ROW (Y) INDEX OF THE HOTTEST PIXELS
     % MEAN OF THOSE PIXEL COORDINATES IS GEOMETRIC CENTER
-    xcol = mean( YXv(1:npixels,2) );
+    xcol = round(mean( YXv(1:npixels,2) ));
 
     % yrow = mean( imSizeY - YXv(1:npixels,1) );
-    yrow = mean( YXv(1:npixels,1) );
-
-    xy(ff,:) = [xcol yrow];
-
-    % imshow(frame,'Parent',hax1)
-    ph1.CData = IMG;
-    ph2.XData = xcol;
-    ph2.YData = yrow;
+    yrow = round(mean( YXv(1:npixels,1) ));
 
 
 
-    if daqA ~= 1 && masks(1).STIM_region(xyloc(2),xyloc(1))
+
+    if daqA ~= 1 && masks(1).STIM_region(yrow,xcol)
         if daqB == 1
             stop(tb);
             daqB = 0;
         end
-        analogOut(lbj,1,0);
         start(ta);
         daqA = 1;
     end
 
-    if daqB ~= 1 && masks(2).STIM_region(xyloc(2),xyloc(1))
+    if daqB ~= 1 && masks(2).STIM_region(yrow,xcol)
         if daqA == 1
             stop(ta);
             daqA = 0;
         end
-        analogOut(lbj,1,0);
         start(tb); 
         daqB = 1;
     end
 
 
+    
+    % imshow(frame,'Parent',hax1)
+    phCAM.CData = IMG;
+    phPIN.XData = xcol;
+    phPIN.YData = yrow;
+    
 
-    tictoc(nn) = toc;        
+    xy(ff,:) = [xcol yrow];
+    % tictoc(nn) = toc;        
     ff=ff+1;
-    pause(.01)
+    pause(.001)
 
     
     % fprintf('\n Ending trial: %d \n', trial);
@@ -207,8 +253,7 @@ end
 
 %% CLEAN UP DEVICE OBJECTS
 
-stop(vidObj); 
-wait(vidObj);
+clear cam
 
 out = imaqfind;
 for nn = 1:length(out)
@@ -223,33 +268,13 @@ stop(tb); pause(.01)
 delete(ta); pause(.01)
 delete(tb); pause(.01)
 
-analogOut(lbj,1,0);
-stopStream(lbj);
-clear lbj
-
+% analogOut(lbj,1,0);
+% stopStream(lbj);
+% clear lbj
 % lbj = labJackU6;
 % reset(lbj,'hard')
 
-
 disp(tictoc')
-
-% memos = memologs(memos, memoboxH, ['tic: ' num2str(tictoc(end))]);
-
-
-%% Save data
-
-% outfile=sprintf('FC_Day1_s%s_%s.mat', subject_id, date);
-% save([sub_dir, '/' outfile],'trial_data', 'Frames', 'FramesTS', 'FrameOrd');
-
-% profile viewer
-
-
-
-
-
-
-
-
 
 
 end
@@ -382,7 +407,7 @@ end
 % ---------------------------------------------------------------------
 %                   TEST TIMER A FUNCTIONS
 % ---------------------------------------------------------------------
-function ta = TESTtimerA(lbj)
+function ta = TESTtimerA(phDAQ)
 
     Time      = 30;
     Hz        = 250;
@@ -400,7 +425,7 @@ function ta = TESTtimerA(lbj)
     nt = 1;
 
     ta = timer;
-    ta.UserData = {voltMatrix, nt, lbj};
+    ta.UserData = {voltMatrix, nt, phDAQ};
     ta.StartFcn = @TESTTimerStartA;
     ta.TimerFcn = @genTESToutputA;
     ta.StopFcn = @TESTTimerCleanupA;
@@ -420,9 +445,14 @@ function genTESToutputA(mTimerA,~)
     uData = mTimerA.UserData;
     vMx = uData{1};
     nt = uData{2};
-    disp( vMx(1,nt) )
+    % disp( vMx(1,nt) )
+    
+    uData{3}.XData = nt;
+    uData{3}.YData = vMx(1,nt);
+    
     % analogOut(uData{3},1,vMx(1,nt))
     nt = nt+1;
+    if nt == 250; nt = 1; end;
     mTimerA.UserData = {vMx, nt, uData{3}};
 
 end
@@ -437,7 +467,7 @@ end
 %                   TEST TIMER B FUNCTIONS
 % ---------------------------------------------------------------------
 
-function tb = TESTtimerB(lbj)
+function tb = TESTtimerB(phDAQ)
 
     Time      = 30;
     Hz        = 250;
@@ -453,7 +483,7 @@ function tb = TESTtimerB(lbj)
     nt = 1;
 
     tb = timer;
-    tb.UserData = {voltMatrix, nt, lbj};
+    tb.UserData = {voltMatrix, nt, phDAQ};
     tb.StartFcn = @TESTTimerStartB;
     tb.TimerFcn = @genTESToutputB;
     tb.StopFcn = @TESTTimerCleanupB;
@@ -473,9 +503,12 @@ function genTESToutputB(mTimerB,~)
     uData = mTimerB.UserData;
     vMx = uData{1};
     nt = uData{2};
-    disp( vMx(1,nt) )
-    % analogOut(uData{3},1,vMx(1,nt))
+
+    uData{3}.XData = nt;
+    uData{3}.YData = vMx(1,nt);
+    
     nt = nt+1;
+    if nt == 250; nt = 1; end;
     mTimerB.UserData = {vMx, nt, uData{3}};
 
 end
@@ -495,8 +528,107 @@ end
 
 
 
+%% OPTIONAL: Play VIDEO overlaying tracking position over rat to check accuracy
+function [masks, IMG] = getROIframes(nmasks)
 
 
+cam = webcam();
+frame = snapshot(cam);
+frameSize = size(frame);
+
+IMG = rgb2gray(frame(:,:,:,1));
+IMG = im2double(IMG);
+
+
+clear cam
+
+out = imaqfind;
+for nn = 1:length(out)
+    stop(out(nn))
+    wait(out(nn));
+    delete(out(nn));
+end
+
+
+
+% SET ROI MASK FROM SINGLE CAM IMAGE
+
+imsz = size(IMG);
+
+
+fhIMG = figure('Units','normalized','OuterPosition',[.05 .05 .75 .8],'Color','w','MenuBar','none');
+haxIMG  = axes('Position',[.01 .01 .95 .95],'Color','none','NextPlot','replacechildren','YDir','reverse');
+haxIMG.XLim = [1, size(IMG,2)];
+haxIMG.YLim = [1, size(IMG,1)];
+hold on;
+
+
+axes(haxIMG)
+ph1 = imagesc(IMG);
+set(gca,'YDir','reverse')
+haxIMG.XLim = [1 size(IMG,2)];
+haxIMG.YLim = [1 size(IMG,1)];
+hold on
+
+axLims = axis;
+
+% axes(hax2)
+ph2 = scatter(1,1,100,'filled','MarkerFaceColor',[.9 .1 .1]);
+axis(axLims)
+hold on
+
+
+masks = struct;
+masks.allmasks = [];
+
+for mm = 1:nmasks
+
+    
+    [STIM_region, STIM_region_x, STIM_region_y] = roipoly; %allows user to plot polygonal ROI
+
+    masks(mm).STIM_region   = STIM_region;
+    masks(mm).STIM_region_x = STIM_region_x;
+    masks(mm).STIM_region_y = STIM_region_y;
+    
+    
+    plot(STIM_region_x, STIM_region_y,'linewidth',6); %show ROI on plot
+    
+    hold on
+
+    
+
+end
+pause(.5)
+
+allmasks = masks(1).STIM_region;
+for mm = 1:nmasks
+
+    allmasks = allmasks + masks(mm).STIM_region;
+
+end
+allmasks(allmasks>0) = 1;
+
+masks(1).allmasks = allmasks;
+
+axes(haxIMG)
+ph3 = imagesc(allmasks .* IMG);
+set(gca,'YDir','reverse')
+haxIMG.XLim = [1 size(IMG,2)];
+haxIMG.YLim = [1 size(IMG,1)];
+hold on
+
+
+for mm = 1:nmasks
+
+    ph4{mm} = plot(masks(mm).STIM_region_x, masks(mm).STIM_region_y,'linewidth',6);
+
+end
+
+
+pause(.001)
+varargout = {ph1, ph2, ph3, ph4};
+
+end
 
 
 
