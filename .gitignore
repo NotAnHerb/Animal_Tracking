@@ -17,5 +17,7 @@ archive
 archive/*
 newcode
 newcode/*
-# driversinstalls
-# driversinstalls/*
+driversinstalls
+driversinstalls/*
+thorcam
+thorcam/*

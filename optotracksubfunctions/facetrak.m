@@ -164,7 +164,8 @@ videoFrame = snapshot(cam);
 frameSize = size(videoFrame);
 
 % Create the video player object. 
-videoPlayer = vision.VideoPlayer('Position', [100 100 [frameSize(2), frameSize(1)]+30]);
+% videoPlayer = vision.VideoPlayer('Position', [10 10 [frameSize(2), frameSize(1)]+30]);
+videoPlayer = vision.VideoPlayer('Position', [10 10 [frameSize(2), frameSize(1)]./2]);
 
 %% Detection and Tracking
 % Capture and process video frames from the webcam in a loop to detect and
